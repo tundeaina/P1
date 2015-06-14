@@ -1,6 +1,5 @@
 package com.aina.adnd.spotifystreamer;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 /**
  * Created by Tunde Aina on 6/13/2015.
  */
@@ -16,9 +17,9 @@ public class ArtistListAdapter extends ArrayAdapter<String> {
 
     private final Context context;
     private final String[] artistName;
-    private final Integer[] artistThumbnail;
+    private final String[] artistThumbnail;
 
-    public ArtistListAdapter(Context context, String[] artistName, Integer[] artistThumbnail) {
+    public ArtistListAdapter(Context context, String[] artistName, String[] artistThumbnail) {
         super(context, R.layout.list_item_artist, artistName);
         this.context = context;
         this.artistName = artistName;
@@ -39,7 +40,18 @@ public class ArtistListAdapter extends ArrayAdapter<String> {
 
         artist_name.setText(artistName[position]);
 
-        artist_thumbnail.setImageResource(artistThumbnail[position]);
+        String imageURL = artistThumbnail[position];
+
+        if(imageURL.equals(ArtistSearchFragment.FetchArtistsTask.NO_IMAGE_URL))
+            Picasso.with(context)
+                    .load(R.drawable.no_image)
+                    .into(artist_thumbnail);
+        else
+            Picasso.with(context)
+                    .load(imageURL)
+                    .placeholder(R.drawable.no_image)
+                    .fit()
+                    .into(artist_thumbnail);
 
         return rowView;
     }

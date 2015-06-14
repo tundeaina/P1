@@ -1,20 +1,13 @@
 package com.aina.adnd.spotifystreamer;
 
-import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
 
 public class ArtistSearchActivity extends ActionBarActivity {
 
@@ -23,28 +16,6 @@ public class ArtistSearchActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_artist_search);
-
-        final EditText artistQueryText = (EditText) findViewById(R.id.edittext_artist);
-
-        artistQueryText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    Toast.makeText(ArtistSearchActivity.this, "Search for "
-                            + artistQueryText.getText(), Toast.LENGTH_SHORT).show();
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-
-                    imm.hideSoftInputFromWindow(artistQueryText.getWindowToken(), 0);
-
-                    handled = true;
-                }
-                return handled;
-            }
-        });
-
 
         ListView artistList = (ListView) findViewById(R.id.listview_artist);
 
