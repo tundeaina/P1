@@ -17,19 +17,6 @@ public class ArtistSearchActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_artist_search);
 
-        ListView artistList = (ListView) findViewById(R.id.listview_artist);
-
-        artistList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                Toast.makeText(ArtistSearchActivity.this, "You Clicked at "
-                        + position, Toast.LENGTH_SHORT).show();
-
-            }
-        });
-
     }
 
 

@@ -10,20 +10,20 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+
 /**
  * Created by Tunde Aina on 6/13/2015.
  */
-public class ArtistListAdapter extends ArrayAdapter<String> {
+public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
 
     private final Context context;
-    private final String[] artistName;
-    private final String[] artistThumbnail;
+    private final ArrayList<ArtistInfo> Artists;
 
-    public ArtistListAdapter(Context context, String[] artistName, String[] artistThumbnail) {
-        super(context, R.layout.list_item_artist, artistName);
+    public ArtistListAdapter(Context context, ArrayList<ArtistInfo> artists) {
+        super(context, R.layout.list_item_artist, artists);
         this.context = context;
-        this.artistName = artistName;
-        this.artistThumbnail = artistThumbnail;
+        this.Artists = artists;
     }
 
     @Override
@@ -34,24 +34,29 @@ public class ArtistListAdapter extends ArrayAdapter<String> {
 
         View rowView = inflater.inflate(R.layout.list_item_artist, null, true);
 
-        TextView artist_name = (TextView) rowView.findViewById(R.id.list_item_name);
+        TextView artist_name_view = (TextView) rowView.findViewById(R.id.list_item_name);
 
-        ImageView artist_thumbnail = (ImageView) rowView.findViewById(R.id.list_item_thumbnail);
+        ImageView artist_thumbnail_view = (ImageView) rowView.findViewById(R.id.list_item_thumbnail);
 
-        artist_name.setText(artistName[position]);
+        ArtistInfo artist = Artists.get(position);
 
-        String imageURL = artistThumbnail[position];
+        if (null != artist) {
 
-        if(imageURL.equals(ArtistSearchFragment.FetchArtistsTask.NO_IMAGE_URL))
-            Picasso.with(context)
-                    .load(R.drawable.no_image)
-                    .into(artist_thumbnail);
-        else
-            Picasso.with(context)
-                    .load(imageURL)
-                    .placeholder(R.drawable.no_image)
-                    .fit()
-                    .into(artist_thumbnail);
+            artist_name_view.setText(artist.getName());
+
+            String imageURL = artist.getImageUrl();
+
+            if (imageURL.equals(ArtistSearchFragment.FetchArtistsTask.NO_IMAGE_URL))
+                Picasso.with(context)
+                        .load(R.drawable.no_image)
+                        .into(artist_thumbnail_view);
+            else
+                Picasso.with(context)
+                        .load(imageURL)
+                        .placeholder(R.drawable.no_image)
+                        .fit()
+                        .into(artist_thumbnail_view);
+        }
 
         return rowView;
     }

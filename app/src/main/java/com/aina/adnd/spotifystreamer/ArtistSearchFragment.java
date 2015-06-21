@@ -11,9 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -27,7 +31,8 @@ import kaaes.spotify.webapi.android.models.Image;
 public class ArtistSearchFragment extends Fragment {
 
     private ArtistListAdapter mAdapter;
-    private View rootView;
+
+    private ArrayList<ArtistInfo> mArtistInfo = new ArrayList<ArtistInfo>();
 
     public ArtistSearchFragment() {
     }
@@ -36,7 +41,7 @@ public class ArtistSearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        rootView = inflater.inflate(R.layout.fragment_artist_search, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_artist_search, container, false);
 
         final EditText artistQueryText = (EditText) rootView.findViewById(R.id.edittext_artist);
 
@@ -65,13 +70,30 @@ public class ArtistSearchFragment extends Fragment {
             }
         });
 
+        mAdapter = new ArtistListAdapter(getActivity(), mArtistInfo);
+
+        ListView artistList = (ListView) rootView.findViewById(R.id.listview_artist);
+
+        artistList.setAdapter(mAdapter);
+
+        artistList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                Toast.makeText(getActivity(), "You Clicked at "
+                        + position, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+        
         return rootView;
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, ArtistsPager> {
 
-        private final String LOG_TAG = FetchArtistsTask.class.getSimpleName();
         public static final String NO_IMAGE_URL = "NO_IMAGE_URL";
+        private final String LOG_TAG = FetchArtistsTask.class.getSimpleName();
 
         @Override
         protected ArtistsPager doInBackground(String... params) {
@@ -93,14 +115,13 @@ public class ArtistSearchFragment extends Fragment {
         @Override
         protected void onPostExecute(ArtistsPager results) {
 
+            mAdapter.clear();
+
             if (results != null) {
 
-                String[] artistArray = new String[results.artists.items.size()];
-                String[] imageURLArray = new String[results.artists.items.size()];
-
-                int j = 0;
-
                 for(Artist artist:  results.artists.items) {
+
+                    ArtistInfo artistInfo = new ArtistInfo();
 
                     String imageUrl = null;
 
@@ -116,22 +137,13 @@ public class ArtistSearchFragment extends Fragment {
                     }
 
                     if(null == imageUrl)
-                        imageURLArray[j] = NO_IMAGE_URL;
-                    else
-                        imageURLArray[j] = imageUrl;
+                        imageUrl = NO_IMAGE_URL;
 
-                    artistArray[j] = artist.name;
+                    artistInfo.setName(artist.name);
+                    artistInfo.setImageUrl(imageUrl);
 
-                    j++;
+                    mAdapter.add(artistInfo);
                 }
-
-                Log.d(LOG_TAG, "Artists ------------------> " + artistArray.length);
-
-                mAdapter = new ArtistListAdapter(getActivity(), artistArray, imageURLArray);
-
-                ListView list = (ListView) rootView.findViewById(R.id.listview_artist);
-
-                list.setAdapter(mAdapter);
 
             }
         }
