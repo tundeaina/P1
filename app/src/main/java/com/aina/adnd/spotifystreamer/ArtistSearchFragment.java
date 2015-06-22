@@ -1,6 +1,7 @@
 package com.aina.adnd.spotifystreamer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -30,8 +32,10 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class ArtistSearchFragment extends Fragment {
 
+    public final static String ARTIST_ID = "ARTIST_ID";
+    public final static String ARTIST_NAME = "ARTIST_NAME";
+    private final static String SAVED_ARTIST_INFO = "SAVED_ARTIST_INFO";
     private ArtistListAdapter mAdapter;
-
     private ArrayList<ArtistInfo> mArtistInfo = new ArrayList<ArtistInfo>();
 
     public ArtistSearchFragment() {
@@ -41,9 +45,19 @@ public class ArtistSearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        if (savedInstanceState != null) {
+
+            mArtistInfo = savedInstanceState.getParcelableArrayList(SAVED_ARTIST_INFO);
+        }
+
+        mAdapter = new ArtistListAdapter(getActivity(), mArtistInfo);
+
         View rootView = inflater.inflate(R.layout.fragment_artist_search, container, false);
 
         final EditText artistQueryText = (EditText) rootView.findViewById(R.id.edittext_artist);
+
+        getActivity().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         artistQueryText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -52,9 +66,6 @@ public class ArtistSearchFragment extends Fragment {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 
                     String artistQueryString = artistQueryText.getText().toString();
-
-//                    Toast.makeText(getActivity(), "Search for "
-//                            + artistQueryString, Toast.LENGTH_SHORT).show();
 
                     FetchArtistsTask artistTask = new FetchArtistsTask();
                     artistTask.execute(artistQueryString);
@@ -70,24 +81,42 @@ public class ArtistSearchFragment extends Fragment {
             }
         });
 
-        mAdapter = new ArtistListAdapter(getActivity(), mArtistInfo);
-
         ListView artistList = (ListView) rootView.findViewById(R.id.listview_artist);
-
-        artistList.setAdapter(mAdapter);
 
         artistList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                Toast.makeText(getActivity(), "You Clicked at "
-                        + position, Toast.LENGTH_SHORT).show();
+
+
+                ArtistInfo artist = mArtistInfo.get(position);
+
+                Toast.makeText(getActivity(), "You Clicked on "
+                        + artist.getId(), Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(getActivity(), TopTenTracksActivity.class);
+                intent.putExtra(ARTIST_ID, artist.getId());
+                intent.putExtra(ARTIST_NAME, artist.getName());
+                startActivity(intent);
+
 
             }
         });
+
+        artistList.setAdapter(mAdapter);
         
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedState) {
+
+        ArrayList<ArtistInfo> artistinfo = mAdapter.getArtistInfo();
+
+        savedState.putParcelableArrayList(SAVED_ARTIST_INFO, artistinfo);
+
+        super.onSaveInstanceState(savedState);
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, ArtistsPager> {
@@ -139,6 +168,7 @@ public class ArtistSearchFragment extends Fragment {
                     if(null == imageUrl)
                         imageUrl = NO_IMAGE_URL;
 
+                    artistInfo.setId(artist.id);
                     artistInfo.setName(artist.name);
                     artistInfo.setImageUrl(imageUrl);
 

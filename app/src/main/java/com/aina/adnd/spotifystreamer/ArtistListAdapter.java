@@ -38,7 +38,9 @@ public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
 
         ImageView artist_thumbnail_view = (ImageView) rowView.findViewById(R.id.list_item_thumbnail);
 
-        ArtistInfo artist = Artists.get(position);
+        ArtistInfo artist;
+
+        artist = Artists.get(position);
 
         if (null != artist) {
 
@@ -59,5 +61,9 @@ public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
         }
 
         return rowView;
+    }
+
+    public ArrayList<ArtistInfo> getArtistInfo() {
+        return this.Artists;
     }
 }
