@@ -11,12 +11,22 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ArtistSearchActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
+
+        <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".TopTenTracksActivity"
+            android:label="@string/title_activity_top_ten_tracks"
+            android:parentActivityName=".ArtistSearchActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.aina.adnd.spotifystreamer.ArtistSearchActivity" />
         </activity>
     </application>
 

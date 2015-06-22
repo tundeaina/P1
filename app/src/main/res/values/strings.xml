@@ -3,4 +3,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="artistName">Enter an Artist</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_top_ten_tracks">Top 10 Tracks</string>
+    <string name="title_activity_fggfgfgf">fggfgfgf</string>
 </resources>
