@@ -170,7 +170,7 @@ public class ArtistSearchFragment extends Fragment {
 
                     artistInfo.setId(artist.id);
                     artistInfo.setName(artist.name);
-                    artistInfo.setImageUrl(imageUrl);
+                    artistInfo.setThumbnailUrl(imageUrl);
 
                     mAdapter.add(artistInfo);
                 }

@@ -10,6 +10,11 @@ import android.view.MenuItem;
 
 public class TopTenTracksActivity extends ActionBarActivity {
 
+    //TODO--Pass artistName and artistId to Fragment
+
+    private String artistName;
+    private String artistId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,8 +22,8 @@ public class TopTenTracksActivity extends ActionBarActivity {
 
         Intent intent = getIntent();
 
-        String artistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
-        String artistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
+        artistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
+        artistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
 
         ActionBar ab = getSupportActionBar();
         ab.setSubtitle(artistName);
@@ -45,5 +50,13 @@ public class TopTenTracksActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public String getArtistName() {
+        return this.artistName;
+    }
+
+    public String getArtistId() {
+        return this.artistId;
     }
 }

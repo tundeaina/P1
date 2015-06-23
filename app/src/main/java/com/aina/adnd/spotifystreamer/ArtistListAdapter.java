@@ -46,7 +46,7 @@ public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
 
             artist_name_view.setText(artist.getName());
 
-            String imageURL = artist.getImageUrl();
+            String imageURL = artist.getThumbnailUrl();
 
             if (imageURL.equals(ArtistSearchFragment.FetchArtistsTask.NO_IMAGE_URL))
                 Picasso.with(context)

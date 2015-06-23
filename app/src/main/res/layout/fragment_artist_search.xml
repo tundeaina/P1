@@ -15,7 +15,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:width="400dp"
-        android:hint="@string/artistName"
+        android:hint="@string/prompt_artist_name"
         android:imeOptions="actionSearch"
         android:singleLine="true" />
 

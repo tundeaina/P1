@@ -20,33 +20,33 @@ public class ArtistInfo implements Parcelable {
             return new ArtistInfo[size];
         }
     };
-    private String Id;
+    private String SpotifyId;
     private String Name;
-    private String ImageUrl;
+    private String ThumbnailUrl;
 
     public ArtistInfo() {
 
     }
 
     public ArtistInfo(String id, String name, String imgurl) {
-        this.Id = id;
+        this.SpotifyId = id;
         this.Name = name;
-        this.ImageUrl = imgurl;
+        this.ThumbnailUrl = imgurl;
 
     }
 
     private ArtistInfo(Parcel in) {
-        Id = in.readString();
+        SpotifyId = in.readString();
         Name = in.readString();
-        ImageUrl = in.readString();
+        ThumbnailUrl = in.readString();
     }
 
     public String getId() {
-        return Id;
+        return SpotifyId;
     }
 
     public void setId(String id) {
-        this.Id = id;
+        this.SpotifyId = id;
     }
 
     public String getName() {
@@ -57,12 +57,12 @@ public class ArtistInfo implements Parcelable {
         this.Name = name;
     }
 
-    public String getImageUrl() {
-        return ImageUrl;
+    public String getThumbnailUrl() {
+        return ThumbnailUrl;
     }
 
-    public void setImageUrl(String imgurl) {
-        this.ImageUrl = imgurl;
+    public void setThumbnailUrl(String imgurl) {
+        this.ThumbnailUrl = imgurl;
     }
 
     public int describeContents() {
@@ -71,9 +71,9 @@ public class ArtistInfo implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
 
-        out.writeString(Id);
+        out.writeString(SpotifyId);
         out.writeString(Name);
-        out.writeString(ImageUrl);
+        out.writeString(ThumbnailUrl);
     }
 
 }

@@ -1,16 +1,51 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Image;
+import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.Tracks;
+import kaaes.spotify.webapi.android.models.TracksPager;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment containing Tracks ListView.
  */
 public class TopTenTracksFragment extends Fragment {
+
+    //TODO--Recieve Artist Name and Artist ID from Activity
+    //TODO-- Toast if no Track found
+
+    private final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
+    private final static String TRACK_PREVIEW_URL = "TRACK_PREVIEW_URL";
+    private final static String ARTIST_NAME = "ARTIST_NAME";
+    private final static String ALBUM_NAME = "ALBUM_NAME";
+    private final static String TRACK_NAME = "TRACK_NAME";
+    private final static String ALBUM_ART = "ALBUM_ART";
+    private final static String COUNTRY_CODE = "US";
+    private final static String QUERY_PARAMETER = "country";
+
+
+    private TrackListAdapter mAdapter;
+    private ArrayList<TrackInfo> mTrackInfo = new ArrayList<TrackInfo>();
 
     public TopTenTracksFragment() {
     }
@@ -18,6 +53,128 @@ public class TopTenTracksFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_top_ten_tracks, container, false);
+
+        if (savedInstanceState != null) {
+
+            mTrackInfo = savedInstanceState.getParcelableArrayList(SAVED_TRACK_INFO);
+        }
+
+        final String artistId = ((TopTenTracksActivity) getActivity()).getArtistId();
+
+        final String artistName = ((TopTenTracksActivity) getActivity()).getArtistName();
+
+        FetchTopTracksTask trackTask = new FetchTopTracksTask();
+        trackTask.execute("43ZHCT0cAZBISjO8DG9PnE");
+
+        mAdapter = new TrackListAdapter(getActivity(), mTrackInfo);
+
+        View rootView = inflater.inflate(R.layout.fragment_top_ten_tracks, container, false);
+
+        ListView trackList = (ListView) rootView.findViewById(R.id.listview_top10tracks);
+
+        trackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+
+                TrackInfo track = mTrackInfo.get(position);
+
+                Toast.makeText(getActivity(), "You Clicked on "
+                        + track.getTrackName(), Toast.LENGTH_SHORT).show();
+
+//                Intent intent = new Intent(getActivity(), TrackPreviewActivity.class);
+//                intent.putExtra(TRACK_PREVIEW_URL, track.getPreviewUrl());
+//                intent.putExtra(ARTIST_NAME, artistName);
+//                intent.putExtra(ALBUM_NAME, track.getAlbumName());
+//                intent.putExtra(TRACK_NAME, track.getTrackName());
+//                intent.putExtra(ALBUM_ART, track.getAlbumArtUrl_Large());
+//                startActivity(intent);
+
+            }
+        });
+
+        trackList.setAdapter(mAdapter);
+
+        return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedState) {
+
+        ArrayList<TrackInfo> trackInfo = mAdapter.getTrackInfo();
+
+        savedState.putParcelableArrayList(SAVED_TRACK_INFO, trackInfo);
+
+        super.onSaveInstanceState(savedState);
+    }
+
+    public class FetchTopTracksTask extends AsyncTask<String, Void, Tracks> {
+
+        public static final String NO_IMAGE_URL = "NO_IMAGE_URL";
+        private final String LOG_TAG = FetchTopTracksTask.class.getSimpleName();
+
+        @Override
+        protected Tracks doInBackground(String... params) {
+
+            try {
+
+                Map<String, Object> map = new HashMap<String, Object>();
+
+                map.put(QUERY_PARAMETER, COUNTRY_CODE);
+
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService spotify = api.getService();
+                return spotify.getArtistTopTrack(params[0], map);
+
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error ", e);
+                return null;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Tracks results) {
+
+            mAdapter.clear();
+
+            if (results != null) {
+
+                for (Track track : results.tracks) {
+
+                    TrackInfo trackInfo = new TrackInfo();
+
+                    String imageUrl_Small = null;
+                    String imageUrl_Large = null;
+
+                    for (Image img : track.album.images) {
+                        if (img.height <= 300) {
+                            imageUrl_Small = img.url;
+
+                        }
+
+                        if (img.height >= 301) {
+                            imageUrl_Large = img.url;
+
+                        }
+                    }
+
+                    imageUrl_Large = (null == imageUrl_Large) ? NO_IMAGE_URL : imageUrl_Large;
+
+                    imageUrl_Small = (null == imageUrl_Small) ? NO_IMAGE_URL : imageUrl_Small;
+
+                    trackInfo.setPreviewUrl(track.preview_url);
+                    trackInfo.setAlbumName(track.album.name);
+                    trackInfo.setTrackName(track.name);
+                    trackInfo.setAlbumArtUrl_Small(imageUrl_Small);
+                    trackInfo.setAlbumArtUrl_Large(imageUrl_Large);
+
+                    mAdapter.add(trackInfo);
+                }
+
+            }
+        }
     }
 }

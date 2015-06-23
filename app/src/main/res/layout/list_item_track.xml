@@ -13,7 +13,7 @@
         android:layout_height="90dp">
 
         <ImageView
-            android:id="@+id/list_item_thumbnail"
+            android:id="@+id/list_item_album_art_small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -27,14 +27,14 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/list_item_name"
+            android:id="@+id/list_item_album_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Fela Anikulapo-Kuti"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/list_item_track"
+            android:id="@+id/list_item_track_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Power Show"
