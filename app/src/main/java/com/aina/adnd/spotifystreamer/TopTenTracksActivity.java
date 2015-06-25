@@ -1,7 +1,5 @@
 package com.aina.adnd.spotifystreamer;
 
-import android.content.Intent;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,26 +8,13 @@ import android.view.MenuItem;
 
 public class TopTenTracksActivity extends ActionBarActivity {
 
-    //TODO--Pass artistName and artistId to Fragment
-
-    private String artistName;
-    private String artistId;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_top_ten_tracks);
 
-        Intent intent = getIntent();
-
-        artistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
-        artistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
-
-        ActionBar ab = getSupportActionBar();
-        ab.setSubtitle(artistName);
-        ab.setDisplayShowTitleEnabled(true);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -46,17 +31,12 @@ public class TopTenTracksActivity extends ActionBarActivity {
 
         switch (item.getItemId()) {
             case R.id.action_settings:
+
+
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public String getArtistName() {
-        return this.artistName;
-    }
-
-    public String getArtistId() {
-        return this.artistId;
-    }
 }

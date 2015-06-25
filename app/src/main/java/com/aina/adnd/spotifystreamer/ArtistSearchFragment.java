@@ -30,6 +30,7 @@ import kaaes.spotify.webapi.android.models.Image;
 /**
  * Fragment containing Artists ListView.
  */
+
 public class ArtistSearchFragment extends Fragment {
 
     public final static String ARTIST_ID = "ARTIST_ID";
@@ -37,6 +38,7 @@ public class ArtistSearchFragment extends Fragment {
     private final static String SAVED_ARTIST_INFO = "SAVED_ARTIST_INFO";
     private ArtistListAdapter mAdapter;
     private ArrayList<ArtistInfo> mArtistInfo = new ArrayList<ArtistInfo>();
+    private String mArtistQueryString;
 
     public ArtistSearchFragment() {
     }
@@ -65,10 +67,12 @@ public class ArtistSearchFragment extends Fragment {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 
-                    String artistQueryString = artistQueryText.getText().toString();
+                    mArtistQueryString = artistQueryText.getText().toString();
 
-                    FetchArtistsTask artistTask = new FetchArtistsTask();
-                    artistTask.execute(artistQueryString);
+                    if (mArtistQueryString.length() > 0) {
+                        FetchArtistsTask artistTask = new FetchArtistsTask();
+                        artistTask.execute(mArtistQueryString);
+                    }
 
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                             Context.INPUT_METHOD_SERVICE);
@@ -92,8 +96,8 @@ public class ArtistSearchFragment extends Fragment {
 
                 ArtistInfo artist = mArtistInfo.get(position);
 
-                Toast.makeText(getActivity(), "You Clicked on "
-                        + artist.getId(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "You Clicked on "
+//                        + artist.getId(), Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(getActivity(), TopTenTracksActivity.class);
                 intent.putExtra(ARTIST_ID, artist.getId());
@@ -146,7 +150,7 @@ public class ArtistSearchFragment extends Fragment {
 
             mAdapter.clear();
 
-            if (results != null) {
+            if (results.artists.items.size() > 0) {
 
                 for(Artist artist:  results.artists.items) {
 
@@ -155,11 +159,7 @@ public class ArtistSearchFragment extends Fragment {
                     String imageUrl = null;
 
                     for(Image img: artist.images){
-                        if(img.height<=65){
-                            imageUrl = img.url;
-                            break;
-                        }
-                        else if(img.height>=200 && img.height<=301) {
+                        if (img.width <= 600) {
                             imageUrl = img.url;
                             break;
                         }
@@ -175,6 +175,9 @@ public class ArtistSearchFragment extends Fragment {
                     mAdapter.add(artistInfo);
                 }
 
+            } else {
+                Toast.makeText(getActivity(), "Spotify can't find\n"
+                        + mArtistQueryString, Toast.LENGTH_LONG).show();
             }
         }
     }

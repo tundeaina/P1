@@ -20,6 +20,7 @@ public class TrackInfo implements Parcelable {
             return new TrackInfo[size];
         }
     };
+
     private String TrackName;
     private String AlbumName;
     private String AlbumArtUrl_Small;

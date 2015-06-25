@@ -7,8 +7,6 @@ import android.view.MenuItem;
 
 public class ArtistSearchActivity extends ActionBarActivity {
 
-    //TODO-- Toast if no Artist found
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

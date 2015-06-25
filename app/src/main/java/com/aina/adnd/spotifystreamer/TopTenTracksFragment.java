@@ -18,21 +18,16 @@ import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
-import kaaes.spotify.webapi.android.models.TracksPager;
 
 
 /**
  * Fragment containing Tracks ListView.
  */
-public class TopTenTracksFragment extends Fragment {
 
-    //TODO--Recieve Artist Name and Artist ID from Activity
-    //TODO-- Toast if no Track found
+public class TopTenTracksFragment extends Fragment {
 
     private final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
     private final static String TRACK_PREVIEW_URL = "TRACK_PREVIEW_URL";
@@ -44,8 +39,12 @@ public class TopTenTracksFragment extends Fragment {
     private final static String QUERY_PARAMETER = "country";
 
 
+    private String mCountry;
     private TrackListAdapter mAdapter;
     private ArrayList<TrackInfo> mTrackInfo = new ArrayList<TrackInfo>();
+
+    private String artistName;
+    private String artistId;
 
     public TopTenTracksFragment() {
     }
@@ -54,17 +53,23 @@ public class TopTenTracksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Intent intent = getActivity().getIntent();
+        artistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
+        artistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
+
+        ((TopTenTracksActivity) getActivity()).getSupportActionBar()
+                .setSubtitle(artistName);
+
         if (savedInstanceState != null) {
 
             mTrackInfo = savedInstanceState.getParcelableArrayList(SAVED_TRACK_INFO);
+        } else {
+
+            FetchTopTracksTask trackTask = new FetchTopTracksTask();
+            trackTask.execute(artistId);
         }
 
-        final String artistId = ((TopTenTracksActivity) getActivity()).getArtistId();
 
-        final String artistName = ((TopTenTracksActivity) getActivity()).getArtistName();
-
-        FetchTopTracksTask trackTask = new FetchTopTracksTask();
-        trackTask.execute("43ZHCT0cAZBISjO8DG9PnE");
 
         mAdapter = new TrackListAdapter(getActivity(), mTrackInfo);
 
@@ -78,15 +83,13 @@ public class TopTenTracksFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
 
-
                 TrackInfo track = mTrackInfo.get(position);
 
-                Toast.makeText(getActivity(), "You Clicked on "
-                        + track.getTrackName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), track.getPreviewUrl(), Toast.LENGTH_SHORT).show();
 
 //                Intent intent = new Intent(getActivity(), TrackPreviewActivity.class);
-//                intent.putExtra(TRACK_PREVIEW_URL, track.getPreviewUrl());
 //                intent.putExtra(ARTIST_NAME, artistName);
+//                intent.putExtra(TRACK_PREVIEW_URL, track.getPreviewUrl());
 //                intent.putExtra(ALBUM_NAME, track.getAlbumName());
 //                intent.putExtra(TRACK_NAME, track.getTrackName());
 //                intent.putExtra(ALBUM_ART, track.getAlbumArtUrl_Large());
@@ -108,6 +111,7 @@ public class TopTenTracksFragment extends Fragment {
         savedState.putParcelableArrayList(SAVED_TRACK_INFO, trackInfo);
 
         super.onSaveInstanceState(savedState);
+
     }
 
     public class FetchTopTracksTask extends AsyncTask<String, Void, Tracks> {
@@ -140,7 +144,7 @@ public class TopTenTracksFragment extends Fragment {
 
             mAdapter.clear();
 
-            if (results != null) {
+            if (results.tracks.size() > 0) {
 
                 for (Track track : results.tracks) {
 
@@ -174,6 +178,9 @@ public class TopTenTracksFragment extends Fragment {
                     mAdapter.add(trackInfo);
                 }
 
+            } else {
+                Toast.makeText(getActivity(), "No tracks found for\n"
+                        + artistName, Toast.LENGTH_SHORT).show();
             }
         }
     }
