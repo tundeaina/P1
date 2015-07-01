@@ -35,6 +35,8 @@ public class ArtistSearchFragment extends Fragment {
 
     public final static String ARTIST_ID = "ARTIST_ID";
     public final static String ARTIST_NAME = "ARTIST_NAME";
+    public final static String COUNTRY_CODE = "COUNTRY_CODE";
+    public final static String COUNTRY = "COUNTRY";
     private final static String SAVED_ARTIST_INFO = "SAVED_ARTIST_INFO";
     private ArtistListAdapter mAdapter;
     private ArrayList<ArtistInfo> mArtistInfo = new ArrayList<ArtistInfo>();
@@ -96,12 +98,12 @@ public class ArtistSearchFragment extends Fragment {
 
                 ArtistInfo artist = mArtistInfo.get(position);
 
-//                Toast.makeText(getActivity(), "You Clicked on "
-//                        + artist.getId(), Toast.LENGTH_SHORT).show();
-
                 Intent intent = new Intent(getActivity(), TopTenTracksActivity.class);
                 intent.putExtra(ARTIST_ID, artist.getId());
                 intent.putExtra(ARTIST_NAME, artist.getName());
+                intent.putExtra(COUNTRY_CODE, ArtistSearchActivity.getCountryCode());
+                intent.putExtra(COUNTRY, ArtistSearchActivity.getCountry());
+
                 startActivity(intent);
 
 
@@ -131,14 +133,14 @@ public class ArtistSearchFragment extends Fragment {
         @Override
         protected ArtistsPager doInBackground(String... params) {
 
+            SpotifyApi api = new SpotifyApi();
+            SpotifyService spotify = api.getService();
+
             try{
 
-                SpotifyApi api = new SpotifyApi();
-                SpotifyService spotify = api.getService();
                 return spotify.searchArtists(params[0]);
 
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 Log.e(LOG_TAG, "Error ", e);
                 return null;
             }

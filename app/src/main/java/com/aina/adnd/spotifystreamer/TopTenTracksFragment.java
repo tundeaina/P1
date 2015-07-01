@@ -35,16 +35,15 @@ public class TopTenTracksFragment extends Fragment {
     private final static String ALBUM_NAME = "ALBUM_NAME";
     private final static String TRACK_NAME = "TRACK_NAME";
     private final static String ALBUM_ART = "ALBUM_ART";
-    private final static String COUNTRY_CODE = "US";
     private final static String QUERY_PARAMETER = "country";
 
-
-    private String mCountry;
     private TrackListAdapter mAdapter;
     private ArrayList<TrackInfo> mTrackInfo = new ArrayList<TrackInfo>();
 
-    private String artistName;
-    private String artistId;
+    private String mArtistName;
+    private String mArtistId;
+    private String mCountryCode;
+    private String mCountry;
 
     public TopTenTracksFragment() {
     }
@@ -54,11 +53,17 @@ public class TopTenTracksFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         Intent intent = getActivity().getIntent();
-        artistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
-        artistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
+        mArtistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
+        mArtistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
+        mCountryCode = intent.getStringExtra(ArtistSearchFragment.COUNTRY_CODE);
+        mCountry = intent.getStringExtra(ArtistSearchFragment.COUNTRY);
+
 
         ((TopTenTracksActivity) getActivity()).getSupportActionBar()
-                .setSubtitle(artistName);
+                .setTitle(getActivity().getTitle() + " - [" + mCountry + "]");
+
+        ((TopTenTracksActivity) getActivity()).getSupportActionBar()
+                .setSubtitle(mArtistName);
 
         if (savedInstanceState != null) {
 
@@ -66,7 +71,7 @@ public class TopTenTracksFragment extends Fragment {
         } else {
 
             FetchTopTracksTask trackTask = new FetchTopTracksTask();
-            trackTask.execute(artistId);
+            trackTask.execute(mArtistId);
         }
 
 
@@ -122,14 +127,13 @@ public class TopTenTracksFragment extends Fragment {
         @Override
         protected Tracks doInBackground(String... params) {
 
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(QUERY_PARAMETER, mCountryCode);
+
+            SpotifyApi api = new SpotifyApi();
+            SpotifyService spotify = api.getService();
+
             try {
-
-                Map<String, Object> map = new HashMap<String, Object>();
-
-                map.put(QUERY_PARAMETER, COUNTRY_CODE);
-
-                SpotifyApi api = new SpotifyApi();
-                SpotifyService spotify = api.getService();
                 return spotify.getArtistTopTrack(params[0], map);
 
             } catch (Exception e) {
@@ -180,7 +184,7 @@ public class TopTenTracksFragment extends Fragment {
 
             } else {
                 Toast.makeText(getActivity(), "No tracks found for\n"
-                        + artistName, Toast.LENGTH_SHORT).show();
+                        + mArtistName, Toast.LENGTH_SHORT).show();
             }
         }
     }

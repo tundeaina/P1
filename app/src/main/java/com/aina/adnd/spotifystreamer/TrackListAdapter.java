@@ -60,7 +60,8 @@ public class TrackListAdapter extends ArrayAdapter<TrackInfo> {
                 Picasso.with(context)
                         .load(albumArtUrl)
                         .placeholder(R.drawable.no_image)
-                        .fit()
+                        .resize(256, 256)
+                        .centerCrop()
                         .into(album_art_view);
         }
 

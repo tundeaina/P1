@@ -56,7 +56,8 @@ public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
                 Picasso.with(context)
                         .load(imageURL)
                         .placeholder(R.drawable.no_image)
-                        .fit()
+                        .resize(256, 256)
+                        .centerCrop()
                         .into(artist_thumbnail_view);
         }
 

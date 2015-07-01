@@ -9,34 +9,27 @@
 
 
     <FrameLayout
-        android:layout_width="100dp"
-        android:layout_height="80dp">
+        android:layout_width="70dp"
+        android:layout_height="60dp">
 
         <ImageView
-            android:id="@+id/list_item_album_art_small"
+            android:id="@+id/list_item_flag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/spotify_thumbnail" />
+            android:layout_gravity="center" />
 
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/list_item_album_name"
+            android:id="@+id/list_item_country"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/list_item_track_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp" />
     </LinearLayout>
 
 </LinearLayout>

@@ -3,4 +3,66 @@
     <string name="prompt_artist_name">Enter an Artist</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_top_ten_tracks">Top 10 Tracks</string>
+    <string name="title_dialog_countries">Select a country</string>
+
+    <string-array name="country_code">
+        <item>ad-Andorra</item>
+        <item>ar-Argentina</item>
+        <item>at-Austria</item>
+        <item>au-Australia</item>
+        <item>be-Belgium</item>
+        <item>bg-Bulgaria</item>
+        <item>bo-Bolivia</item>
+        <item>br-Brasil</item>
+        <item>ca-Canada</item>
+        <item>cl-Chile</item>
+        <item>co-Colombia</item>
+        <item>cr-Costa Rica</item>
+        <item>cy-Cyprus</item>
+        <item>cz-Czech Republic</item>
+        <item>de-Deutschland</item>
+        <item>dk-Denmark</item>
+        <item>dr-Dominican Republic</item>
+        <item>ec-Ecuador</item>
+        <item>sv-El Salvador</item>
+        <item>ee-Estonia</item>
+        <item>es-Spain</item>
+        <item>fi-Finland</item>
+        <item>fr-France</item>
+        <item>gr-Greece</item>
+        <item>gt-Guatemala</item>
+        <item>hk-Hong Kong</item>
+        <item>hn-Honduras</item>
+        <item>hu-Hungary</item>
+        <item>ie-Ireland</item>
+        <item>is-Iceland</item>
+        <item>it-Italia</item>
+        <item>li-Liechtenstein</item>
+        <item>lt-Lithuania</item>
+        <item>lu-Luxemburg</item>
+        <item>lv-Latvia</item>
+        <item>mc-Monaco</item>
+        <item>mt-Malta</item>
+        <item>mx-Mexico</item>
+        <item>my-Malaysia</item>
+        <item>ni-Nicaragua</item>
+        <item>nl-Netherland</item>
+        <item>no-Norway</item>
+        <item>nz-New Zealand</item>
+        <item>pa-Panama</item>
+        <item>pe-Peru</item>
+        <item>ph-Philippines</item>
+        <item>pl-Poland</item>
+        <item>pt-Portugal</item>
+        <item>py-Paraguay</item>
+        <item>sg-Singapore</item>
+        <item>sk-Slovakia</item>
+        <item>se-Sweden</item>
+        <item>ch-Switzerland</item>
+        <item>tr-Turkey</item>
+        <item>tw-Taiwan</item>
+        <item>gb-United Kingdom</item>
+        <item>us-USA</item>
+        <item>uy-Uruguay</item>
+    </string-array>
 </resources>
