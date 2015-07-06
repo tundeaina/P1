@@ -1,18 +1,20 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.widget.ImageView;
 
-public class ArtistSearchActivity extends ActionBarActivity implements DialogMessanger {
+public class ArtistSearchActivity extends ActionBarActivity implements DialogMessenger {
 
     private static final String COUNTRY_DIALOG = "CountryDialog";
     private static final String DEFAULT_COUNTRY_CODE = "us";
     private static final String DEFAULT_COUNTRY = "United States";
-    private static String mCountryCode = null;
-    private static String mCountry = null;
+    private static String mCountryCode;
+    private static String mCountry;
 
     public static String getCountryCode() {
 
@@ -28,23 +30,24 @@ public class ArtistSearchActivity extends ActionBarActivity implements DialogMes
         return mCountry;
     }
 
-    public void onDialogMessage(String sender, Object message) {
-
-        CountryInfo countryInfo = (CountryInfo) message;
-
-        mCountryCode = ((CountryInfo) message).getCountryCode();
-        mCountry = ((CountryInfo) message).getCountryName();
-
-        Toast.makeText(ArtistSearchActivity.this, mCountryCode,
-                Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_artist_search);
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (UserPreferences.getUserCountryCode(ArtistSearchActivity.this).length() == 0) {
+            mCountryCode = DEFAULT_COUNTRY_CODE;
+        } else
+            mCountryCode = UserPreferences.getUserCountryCode(ArtistSearchActivity.this);
+
+        renderCountryFlag();
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ArtistSearchActivity extends ActionBarActivity implements DialogMes
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_country) {
 
             CountryListDialogFragment countryListDialogFragmentDialog =
                     new CountryListDialogFragment();
@@ -75,4 +78,39 @@ public class ArtistSearchActivity extends ActionBarActivity implements DialogMes
         return super.onOptionsItemSelected(item);
     }
 
+    public void onDialogMessage(String sender, Object message) {
+
+        CountryInfo countryInfo = (CountryInfo) message;
+
+        mCountryCode = ((CountryInfo) message).getCountryCode();
+        mCountry = ((CountryInfo) message).getCountryName();
+
+        UserPreferences.setUserCountryCode(ArtistSearchActivity.this, mCountryCode);
+
+        renderCountryFlag();
+    }
+
+    private void renderCountryFlag() {
+
+//        Toast.makeText(ArtistSearchActivity.this, mCountryCode,
+//                Toast.LENGTH_SHORT).show();
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayOptions(actionBar.getDisplayOptions()
+                | ActionBar.DISPLAY_SHOW_CUSTOM);
+        ImageView imageView = new ImageView(actionBar.getThemedContext());
+        imageView.setScaleType(ImageView.ScaleType.CENTER);
+
+        int flagResID = getResources().getIdentifier(mCountryCode, "drawable", getPackageName());
+
+        imageView.setImageResource(flagResID);
+
+        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        layoutParams.rightMargin = 40;
+        imageView.setLayoutParams(layoutParams);
+        actionBar.setCustomView(imageView);
+    }
 }

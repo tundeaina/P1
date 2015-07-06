@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class CountryListDialogFragment extends DialogFragment {
 
     private static final String COUNTRY_DIALOG = "CountryDialog";
-    DialogMessanger messanger;
+    DialogMessenger messenger;
     private CountryListAdapter mAdapter;
     private ArrayList<CountryInfo> mCountryInfo = new ArrayList<CountryInfo>();
     private ListView countryList;
@@ -26,7 +26,7 @@ public class CountryListDialogFragment extends DialogFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        messanger = (DialogMessanger) activity;
+        messenger = (DialogMessenger) activity;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class CountryListDialogFragment extends DialogFragment {
 
                 CountryInfo country = mCountryInfo.get(position);
 
-                messanger.onDialogMessage(COUNTRY_DIALOG, country);
+                messenger.onDialogMessage(COUNTRY_DIALOG, country);
 
                 dismiss();
 
