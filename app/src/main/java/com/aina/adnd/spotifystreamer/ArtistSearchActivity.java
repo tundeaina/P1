@@ -47,7 +47,8 @@ public class ArtistSearchActivity extends ActionBarActivity implements DialogMes
         } else
             mCountryCode = UserPreferences.getUserCountryCode(ArtistSearchActivity.this);
 
-        renderCountryFlag();
+        CountryFlag countryFlag = new CountryFlag(this, mCountryCode);
+        countryFlag.render();
     }
 
     @Override
@@ -87,30 +88,8 @@ public class ArtistSearchActivity extends ActionBarActivity implements DialogMes
 
         UserPreferences.setUserCountryCode(ArtistSearchActivity.this, mCountryCode);
 
-        renderCountryFlag();
+        CountryFlag countryFlag = new CountryFlag(this, mCountryCode);
+        countryFlag.render();
     }
 
-    private void renderCountryFlag() {
-
-//        Toast.makeText(ArtistSearchActivity.this, mCountryCode,
-//                Toast.LENGTH_SHORT).show();
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayOptions(actionBar.getDisplayOptions()
-                | ActionBar.DISPLAY_SHOW_CUSTOM);
-        ImageView imageView = new ImageView(actionBar.getThemedContext());
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
-
-        int flagResID = getResources().getIdentifier(mCountryCode, "drawable", getPackageName());
-
-        imageView.setImageResource(flagResID);
-
-        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        layoutParams.rightMargin = 40;
-        imageView.setLayoutParams(layoutParams);
-        actionBar.setCustomView(imageView);
-    }
 }

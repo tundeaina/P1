@@ -61,25 +61,10 @@ public class TopTenTracksFragment extends Fragment {
         mCountryCode = intent.getStringExtra(ArtistSearchFragment.COUNTRY_CODE);
         mCountry = intent.getStringExtra(ArtistSearchFragment.COUNTRY);
 
-        ActionBar actionBar = ((TopTenTracksActivity) getActivity()).getSupportActionBar();
-        actionBar.setDisplayOptions(actionBar.getDisplayOptions()
-                | ActionBar.DISPLAY_SHOW_CUSTOM);
-        ImageView imageView = new ImageView(actionBar.getThemedContext());
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
+        CountryFlag countryFlag = new CountryFlag((TopTenTracksActivity) getActivity()
+                , mCountryCode);
 
-        int flagResID = getActivity().getResources().getIdentifier(mCountryCode,
-                "drawable", getActivity().getPackageName());
-
-        imageView.setImageResource(flagResID);
-
-        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                Gravity.RIGHT | Gravity.CENTER_VERTICAL);
-        layoutParams.rightMargin = 40;
-        imageView.setLayoutParams(layoutParams);
-        actionBar.setCustomView(imageView);
-
+        countryFlag.render();
 
 //        ((TopTenTracksActivity) getActivity()).getSupportActionBar()
 //                .setTitle(getActivity().getTitle() + " - [" + mCountry + "]");
