@@ -21,15 +21,14 @@
         <item>cr-Costa Rica</item>
         <item>cy-Cyprus</item>
         <item>cz-Czech Republic</item>
-        <item>de-Deutschland</item>
         <item>dk-Denmark</item>
-        <item>dr-Dominican Republic</item>
+        <item>do-Dominican Republic</item>
         <item>ec-Ecuador</item>
         <item>sv-El Salvador</item>
         <item>ee-Estonia</item>
-        <item>es-Spain</item>
         <item>fi-Finland</item>
         <item>fr-France</item>
+        <item>de-Germany</item>
         <item>gr-Greece</item>
         <item>gt-Guatemala</item>
         <item>hk-Hong Kong</item>
@@ -37,7 +36,7 @@
         <item>hu-Hungary</item>
         <item>ie-Ireland</item>
         <item>is-Iceland</item>
-        <item>it-Italia</item>
+        <item>it-Italy</item>
         <item>li-Liechtenstein</item>
         <item>lt-Lithuania</item>
         <item>lu-Luxemburg</item>
@@ -58,6 +57,7 @@
         <item>py-Paraguay</item>
         <item>sg-Singapore</item>
         <item>sk-Slovakia</item>
+        <item>es-Spain</item>
         <item>se-Sweden</item>
         <item>ch-Switzerland</item>
         <item>tr-Turkey</item>

@@ -1,12 +1,20 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class TopTenTracksActivity extends ActionBarActivity {
+public class TopTenTracksActivity extends ActionBarActivity
+        implements DialogMessenger {
+
+    public final static String COUNTRY_CODE = "COUNTRY_CODE";
+    public final static String COUNTRY = "COUNTRY";
+    private static final String COUNTRY_DIALOG = "CountryDialog";
+    private static String mCountryCode;
+    private static String mCountry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,21 +25,37 @@ public class TopTenTracksActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (UserPreferences.getUserCountryCode(TopTenTracksActivity.this).length() > 0) {
+
+            mCountryCode = UserPreferences.getUserCountryCode(TopTenTracksActivity.this);
+
+            CountryFlag countryFlag = new CountryFlag(this, mCountryCode);
+
+            countryFlag.render();
+        }
+
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_top_ten_tracks, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
 
         switch (item.getItemId()) {
             case R.id.action_settings:
+                return true;
+            case R.id.action_country:
+                CountryListDialogFragment countryListDialogFragmentDialog =
+                        new CountryListDialogFragment();
 
+                countryListDialogFragmentDialog.show(getFragmentManager(), COUNTRY_DIALOG);
 
                 return true;
         }
@@ -39,4 +63,29 @@ public class TopTenTracksActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void onDialogMessage(String sender, Object message) {
+
+        CountryInfo countryInfo = (CountryInfo) message;
+
+        mCountryCode = countryInfo.getCountryCode();
+
+        mCountry = countryInfo.getCountryName();
+
+        UserPreferences.setUserCountryCode(this, mCountryCode);
+
+//        CountryFlag countryFlag = new CountryFlag(this,mCountryCode);
+//
+//        countryFlag.render();
+
+        finish();
+
+        Intent intent = getIntent();
+
+        intent.putExtra(COUNTRY_CODE, mCountryCode);
+
+        intent.putExtra(COUNTRY, mCountry);
+
+        startActivity(intent);
+
+    }
 }

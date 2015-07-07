@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,10 @@ import java.util.ArrayList;
  */
 public class CountryListDialogFragment extends DialogFragment {
 
-    private static final String COUNTRY_DIALOG = "CountryDialog";
+    private final static String COUNTRY_DIALOG = "CountryDialog";
+    private final static String _DR = "dr";
+    private final static String _DO = "do";
+
     DialogMessenger messenger;
     private CountryListAdapter mAdapter;
     private ArrayList<CountryInfo> mCountryInfo = new ArrayList<CountryInfo>();
@@ -39,14 +43,25 @@ public class CountryListDialogFragment extends DialogFragment {
         mAdapter = new CountryListAdapter(getActivity(), mCountryInfo);
 
         for (String country : countries) {
+
             CountryInfo countryInfo = new CountryInfo();
 
             String[] countryInfoToken = country.split("-");
-            countryInfo.setCountryCode(countryInfoToken[0]);
+
+            String countryCode = countryInfoToken[0];
+
+            countryInfo.setCountryCode(countryCode);
+
             countryInfo.setCountryName(countryInfoToken[1]);
 
-            int flagResID = getActivity().getResources().getIdentifier(countryInfoToken[0],
-                    "drawable", getActivity().getPackageName());
+            countryCode = (_DO.equals(countryCode)) ? _DR : countryCode;
+
+//            Log.d(COUNTRY_DIALOG, countryCode);
+
+            int flagResID = getActivity().getResources().getIdentifier(
+                    countryCode,
+                    "drawable",
+                    getActivity().getPackageName());
 
             countryInfo.setCountryFlagId(flagResID);
 

@@ -10,6 +10,8 @@ import android.widget.ImageView;
  */
 public class CountryFlag {
 
+    private final static String _DR = "dr";
+    private final static String _DO = "do";
     private final ActionBarActivity mActivity;
     private final String mCountryCode;
 
@@ -29,8 +31,12 @@ public class CountryFlag {
 
         imageView.setScaleType(ImageView.ScaleType.CENTER);
 
-        int flagResID = mActivity.getResources().getIdentifier(mCountryCode,
-                "drawable", mActivity.getPackageName());
+        String countryCode = (_DO.equals(mCountryCode)) ? _DR : mCountryCode;
+
+        int flagResID = mActivity.getResources().getIdentifier(
+                countryCode,
+                "drawable",
+                mActivity.getPackageName());
 
         imageView.setImageResource(flagResID);
 
