@@ -29,12 +29,13 @@ import kaaes.spotify.webapi.android.models.Tracks;
 
 public class TopTenTracksFragment extends Fragment {
 
-    private final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
-    private final static String TRACK_PREVIEW_URL = "TRACK_PREVIEW_URL";
-    private final static String ARTIST_NAME = "ARTIST_NAME";
-    private final static String ALBUM_NAME = "ALBUM_NAME";
-    private final static String TRACK_NAME = "TRACK_NAME";
-    private final static String ALBUM_ART = "ALBUM_ART";
+    public final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
+    public final static String TRACK_INDEX = "TRACK_INDEX";
+    public final static String TRACK_PREVIEW_URL = "TRACK_PREVIEW_URL";
+    public final static String ARTIST_NAME = "ARTIST_NAME";
+    public final static String ALBUM_NAME = "ALBUM_NAME";
+    public final static String TRACK_NAME = "TRACK_NAME";
+    public final static String ALBUM_ART = "ALBUM_ART";
     private final static String QUERY_PARAMETER = "country";
 
     private TrackListAdapter mAdapter;
@@ -94,15 +95,17 @@ public class TopTenTracksFragment extends Fragment {
 
                 TrackInfo track = mTrackInfo.get(position);
 
-                Toast.makeText(getActivity(), track.getPreviewUrl(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), TrackPreviewActivity.class);
 
-//                Intent intent = new Intent(getActivity(), TrackPreviewActivity.class);
-//                intent.putExtra(ARTIST_NAME, artistName);
+                intent.putParcelableArrayListExtra(SAVED_TRACK_INFO, mAdapter.getTrackInfo());
+                intent.putExtra(ARTIST_NAME, mArtistName);
+                intent.putExtra(TRACK_INDEX, position);
+
 //                intent.putExtra(TRACK_PREVIEW_URL, track.getPreviewUrl());
 //                intent.putExtra(ALBUM_NAME, track.getAlbumName());
 //                intent.putExtra(TRACK_NAME, track.getTrackName());
 //                intent.putExtra(ALBUM_ART, track.getAlbumArtUrl_Large());
-//                startActivity(intent);
+                startActivity(intent);
 
             }
         });
