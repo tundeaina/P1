@@ -35,7 +35,8 @@ public class TrackPreviewFragment extends Fragment
     TextView trackNameView;
     ImageView trackAlbumArtView;
     SeekBar trackSeekBar = null;
-    MediaPlayer mMediaPlayer = new MediaPlayer();
+    MediaPlayer mMediaPlayer;
+    ImageButton mButtonPause;
     private Integer mDuration;
     private Integer mTrackIndex;
     private String mArtistName;
@@ -62,19 +63,27 @@ public class TrackPreviewFragment extends Fragment
 
         View rootView = inflater.inflate(R.layout.fragment_track_preview, container, false);
 
-        ImageButton buttonPause = (ImageButton) rootView.findViewById(R.id.trackplayer_pause);
-        buttonPause.setOnClickListener(new View.OnClickListener() {
+        mButtonPause = (ImageButton) rootView.findViewById(R.id.trackplayer_pause);
+        mButtonPause.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
                 setTrackInfo();
 
-                playPreview(mPreviewUrl);
+                if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                    setPauseButtonImage();
+                } else {
+                    playPreview(mPreviewUrl);
+                }
             }
         });
 
         ImageButton buttonPrev = (ImageButton) rootView.findViewById(R.id.trackplayer_prev);
         buttonPrev.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
                 if (mTrackIndex > 0) mTrackIndex--;
+
                 setTrackInfo();
 
                 playPreview(mPreviewUrl);
@@ -84,10 +93,13 @@ public class TrackPreviewFragment extends Fragment
         ImageButton buttonNext = (ImageButton) rootView.findViewById(R.id.trackplayer_next);
         buttonNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
                 if (mTrackIndex < mTrackInfo.size() - 1) mTrackIndex++;
+
                 setTrackInfo();
 
                 playPreview(mPreviewUrl);
+
             }
         });
 
@@ -128,6 +140,14 @@ public class TrackPreviewFragment extends Fragment
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mMediaPlayer = new MediaPlayer();
+        playPreview(mPreviewUrl);
+        //setPauseButtonImage();
+    }
+
     private void setTrackInfo() {
 
         mPreviewUrl = mTrackInfo.get(mTrackIndex).getPreviewUrl();
@@ -150,7 +170,7 @@ public class TrackPreviewFragment extends Fragment
     private void playPreview(String url) {
 
         mMediaPlayer.reset();
-
+        setPauseButtonImage();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
@@ -158,11 +178,12 @@ public class TrackPreviewFragment extends Fragment
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.prepareAsync();
         } catch (IOException e) {
-
+            Log.d(LOG_TAG, "prepareAsync Failure");
         }
 
     }
 
+    @Override
     public void onStop() {
         super.onStop();
         mMediaPlayer.release();
@@ -173,6 +194,15 @@ public class TrackPreviewFragment extends Fragment
         mDuration = mMediaPlayer.getDuration();
         Log.d(LOG_TAG, mDuration.toString());
         player.start();
+        setPauseButtonImage();
+    }
+
+    private void setPauseButtonImage() {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mButtonPause.setImageResource(android.R.drawable.ic_media_pause);
+        } else {
+            mButtonPause.setImageResource(android.R.drawable.ic_media_play);
+        }
     }
 
     //TODO Create Runable to progress SeekBar

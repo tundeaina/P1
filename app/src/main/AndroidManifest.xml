@@ -37,6 +37,10 @@
                 android:value="com.aina.adnd.spotifystreamer.TopTenTracksActivity" />
         </activity>
 
+        <service
+            android:name=".MediaPlayerService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
