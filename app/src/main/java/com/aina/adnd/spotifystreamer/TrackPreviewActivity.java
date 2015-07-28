@@ -1,16 +1,13 @@
 package com.aina.adnd.spotifystreamer;
 
-import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.Toast;
-
 
 public class TrackPreviewActivity extends ActionBarActivity {
+
+    private final String LOG_TAG = TrackPreviewActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +15,16 @@ public class TrackPreviewActivity extends ActionBarActivity {
         setContentView(R.layout.activity_track_preview);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

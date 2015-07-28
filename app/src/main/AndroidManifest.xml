@@ -38,9 +38,10 @@
         </activity>
 
         <service
-            android:name=".MediaPlayerService"
+            android:name="com.aina.adnd.spotifystreamer.MediaPlayerService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
     </application>
 
 </manifest>
