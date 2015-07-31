@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,15 +30,15 @@ import com.aina.adnd.spotifystreamer.MediaPlayerService.MediaPlayerServiceBinder
  */
 public class TrackPreviewFragment extends Fragment {
 
-    private final static Integer MILLI_SECONDS = 1000;
+    private final static Integer DELAY = 500;
+    private static final String CURRENT_POSITION = "CURRENT_POSITION";
+    private final static String DESTROY_INTENT = "DestructionIntent";
     private final String LOG_TAG = TrackPreviewFragment.class.getSimpleName();
     private final String IDLE = "IDLE";
     private final String PREPARING = "PREPARING";
     private final String READY = "READY";
     private final String PLAYING = "PLAYING";
     private final String PAUSED = "PAUSED";
-
-
     TextView artistNameView;
     TextView albumNameView;
     TextView trackNameView;
@@ -50,53 +51,47 @@ public class TrackPreviewFragment extends Fragment {
     ImageButton mButtonPause;
     MediaPlayerService mService;
     Handler progressHandler = new Handler();
+    MediaPlayerResultReceiver resultReceiver;
+
     private Integer mTrackIndex;
     private String mArtistName;
     private String mPreviewUrl;
     private ArrayList<TrackInfo> mTrackInfo = new ArrayList<TrackInfo>();
     private boolean mIsBound;
+    private int mCurrentPosition;
+
     private Runnable updateProgress = new Runnable() {
         @Override
         public void run() {
 
             Integer currentPosition = 0;
 
-            try {
-                Thread.sleep(1000);
-
-            } catch (InterruptedException e) {
-                return;
-            } catch (Exception e) {
-                return;
-            }
+            Integer duration = mService.getDuration();
+            trackSeekBar.setMax(duration);
+            trackEndView.setText(formatDuration(duration));
 
             currentPosition = mService.getCurrentPosition();
-            Integer duration = mService.getDuration();
+            trackSeekBar.setProgress(currentPosition + DELAY);
+            trackStartView.setText(formatDuration(currentPosition + DELAY));
 
-            trackSeekBar.setMax(duration);
-            trackSeekBar.setProgress(currentPosition + 1000);
-            trackEndView.setText(formatDuration(duration));
-            trackStartView.setText(formatDuration(currentPosition + 1000));
+            mCurrentPosition = currentPosition;
 
-            progressHandler.postDelayed(updateProgress, 0);
-
+            progressHandler.postDelayed(updateProgress, DELAY);
         }
     };
+
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
 
             MediaPlayerServiceBinder binder = (MediaPlayerServiceBinder) service;
 
-            Log.d(LOG_TAG, "----- onServiceConnected before getting service-- ");
-
             mService = binder.getService();
 
-            Log.d(LOG_TAG, "----- onServiceConnected after getting service-- ");
-
             if (mService != null) {
-
+                setTrackInfo();
+                playPreview(mPreviewUrl);
                 mIsBound = true;
-            } else Log.d(LOG_TAG, "-----mService is NOTHING -- ");
+            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -107,12 +102,27 @@ public class TrackPreviewFragment extends Fragment {
     public TrackPreviewFragment() {
     }
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        resultReceiver = new MediaPlayerResultReceiver(null);
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Intent intent = getActivity().getIntent();
+        Log.d(LOG_TAG, "onCreateView");
 
+        if (savedInstanceState != null) {
+            // Restore last state for checked position.
+            mCurrentPosition = savedInstanceState.getInt(CURRENT_POSITION, 0);
+        }
+
+        Intent intent = getActivity().getIntent();
         mTrackInfo = intent.getParcelableArrayListExtra(TopTenTracksFragment.SAVED_TRACK_INFO);
         mArtistName = intent.getStringExtra(TopTenTracksFragment.ARTIST_NAME);
         mTrackIndex = intent.getIntExtra(TopTenTracksFragment.TRACK_INDEX, 0);
@@ -128,12 +138,12 @@ public class TrackPreviewFragment extends Fragment {
                 if (PAUSED.equals(mService.getPlayerState())) {
 
                     setPauseButtonImage();
-                    progressHandler.postDelayed(updateProgress, 0);
+                    progressHandler.postDelayed(updateProgress, DELAY);
                     mService.start();
+
                 } else if (PLAYING.equals(mService.getPlayerState())) {
 
                     setPauseButtonImage();
-
                     mService.pause();
                     progressHandler.removeCallbacks(updateProgress);
 
@@ -147,10 +157,11 @@ public class TrackPreviewFragment extends Fragment {
         buttonPrev.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                if (mTrackIndex > 0) mTrackIndex--;
-
+                if (mTrackIndex > 0)
+                    mTrackIndex--;
+                else
+                    mTrackIndex = mTrackInfo.size() - 1;
                 setTrackInfo();
-
                 playPreview(mPreviewUrl);
             }
         });
@@ -159,17 +170,23 @@ public class TrackPreviewFragment extends Fragment {
         buttonNext.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                if (mTrackIndex < mTrackInfo.size() - 1) mTrackIndex++;
+                if (mTrackIndex < mTrackInfo.size() - 1)
+                    mTrackIndex++;
+                else
+                    mTrackIndex = 0;
 
                 setTrackInfo();
-
                 playPreview(mPreviewUrl);
 
             }
         });
 
-        trackSeekBar = (SeekBar) rootView.findViewById(R.id.seekbar_track_player);
+        artistNameView = (TextView) rootView.findViewById(R.id.textview_artist_name);
+        albumNameView = (TextView) rootView.findViewById(R.id.textview_album_name);
+        trackNameView = (TextView) rootView.findViewById(R.id.textview_track_name);
+        trackAlbumArtView = (ImageView) rootView.findViewById(R.id.imageview_album_art);
 
+        trackSeekBar = (SeekBar) rootView.findViewById(R.id.seekbar_track_player);
         trackSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
             int progress = 0;
 
@@ -186,19 +203,16 @@ public class TrackPreviewFragment extends Fragment {
 
                 mService.seekTo(progress);
 
-                Toast.makeText(getActivity(), "seek bar progress:" + progress,
-                        Toast.LENGTH_SHORT).show();
+                if (!PLAYING.equals(mService.getPlayerState())) {
+                    mService.start();
+                }
+
+//                Toast.makeText(getActivity(), "seek bar progress:" + progress,
+//                        Toast.LENGTH_SHORT).show();
             }
         });
-
-        artistNameView = (TextView) rootView.findViewById(R.id.textview_artist_name);
-        albumNameView = (TextView) rootView.findViewById(R.id.textview_album_name);
-        trackNameView = (TextView) rootView.findViewById(R.id.textview_track_name);
-        trackAlbumArtView = (ImageView) rootView.findViewById(R.id.imageview_album_art);
         trackStartView = (TextView) rootView.findViewById(R.id.textview_track_start);
         trackEndView = (TextView) rootView.findViewById(R.id.textview_track_end);
-
-        setTrackInfo();
 
         return rootView;
     }
@@ -207,29 +221,58 @@ public class TrackPreviewFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        Toast.makeText(getActivity(), "onStart - Binding",
-                Toast.LENGTH_SHORT).show();
-
+        Log.d(LOG_TAG, "onStart - ");
+//        Toast.makeText(getActivity(), "onStart - Binding",
+//                Toast.LENGTH_SHORT).show();
         BindToService();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.d(LOG_TAG, "onResume - ");
+
+        if (mCurrentPosition > 0) {
+
+//            try {
+//                Thread.sleep(1000);
+//
+//            } catch (InterruptedException e) {
+//                return;
+//            } catch (Exception e) {
+//                return;
+//            }
+
+            //mService.seekTo(mCurrentPosition + (7 * DELAY));
+            progressHandler.postDelayed(updateProgress, DELAY);
+        }
+
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        Toast.makeText(getActivity(), "onStop - Unbinding",
-                Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG, "onStop - ");
 
         progressHandler.removeCallbacks(updateProgress);
 
-        UnBindService();
+        //UnBindService();
     }
 
-    //----------------------------
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt(CURRENT_POSITION, mCurrentPosition);
+    }
+
 
     private void setTrackInfo() {
 
         mPreviewUrl = mTrackInfo.get(mTrackIndex).getPreviewUrl();
+
         String mAlbumName = mTrackInfo.get(mTrackIndex).getAlbumName();
         String mTrackName = mTrackInfo.get(mTrackIndex).getTrackName();
         String mAlbumArtUrl = mTrackInfo.get(mTrackIndex).getAlbumArtUrl_Large();
@@ -245,19 +288,18 @@ public class TrackPreviewFragment extends Fragment {
 //                .centerCrop()
                 .into(trackAlbumArtView);
     }
-    //----------------------------
 
     private void playPreview(String url) {
 
+        progressHandler.removeCallbacks(updateProgress);
+
         mService.setTrackUrl(url);
-
         mService.reset();
-
         mService.play();
 
         setPauseButtonImage();
 
-        progressHandler.postDelayed(updateProgress, 0);
+        progressHandler.postDelayed(updateProgress, DELAY);
     }
 
     private String formatDuration(Integer duration) {
@@ -270,7 +312,7 @@ public class TrackPreviewFragment extends Fragment {
 
     private void setPauseButtonImage() {
 
-        if (PLAYING.equals(mService.getPlayerState())) {
+        if (!PLAYING.equals(mService.getPlayerState())) {
             mButtonPause.setImageResource(android.R.drawable.ic_media_pause);
         } else {
             mButtonPause.setImageResource(android.R.drawable.ic_media_play);
@@ -282,17 +324,58 @@ public class TrackPreviewFragment extends Fragment {
         Intent intent = new Intent(getActivity()
                 .getApplicationContext(), MediaPlayerService.class);
 
+        intent.putExtra(DESTROY_INTENT, resultReceiver);
+
+        getActivity()
+                .getApplicationContext()
+                .startService(intent);
+
         getActivity()
                 .getApplicationContext()
                 .bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         mIsBound = true;
+
+        //Toast.makeText(getActivity(), "BindToService - Bound", Toast.LENGTH_SHORT).show();
+
     }
 
     void UnBindService() {
         if (mIsBound) {
             getActivity().getApplicationContext().unbindService(mConnection);
             mIsBound = false;
+        }
+    }
+
+    class MediaPlayerResultReceiver extends ResultReceiver {
+        public MediaPlayerResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == 100) {
+                try {
+
+                    Thread.sleep(2000);
+
+                    //TODO let service kill self.
+                    // remove callbacks ??
+                    // then Set mIsBound to false here
+                    // wrap playTrack in mISBound
+
+                    Log.d(LOG_TAG, "MediaPlayerResultReceiver onReceiveResult- "
+                            + resultData.get(DESTROY_INTENT));
+
+                    progressHandler.removeCallbacks(updateProgress);
+                    UnBindService();
+
+                } catch (InterruptedException e) {
+                    return;
+                } catch (Exception e) {
+                    return;
+                }
+            }
         }
     }
 

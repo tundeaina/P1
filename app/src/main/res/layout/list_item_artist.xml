@@ -16,8 +16,7 @@
             android:id="@+id/list_item_thumbnail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/spotify_thumbnail" />
+            android:layout_gravity="center" />
 
     </FrameLayout>
 

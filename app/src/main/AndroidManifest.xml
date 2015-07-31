@@ -22,7 +22,7 @@
         <activity
             android:name=".TopTenTracksActivity"
             android:label="@string/title_activity_top_ten_tracks"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
             android:parentActivityName=".ArtistSearchActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -30,6 +30,7 @@
         </activity>
         <activity
             android:name=".TrackPreviewActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_track_preview"
             android:parentActivityName=".TopTenTracksActivity">
             <meta-data
