@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -26,19 +25,20 @@ import java.util.concurrent.TimeUnit;
 import com.aina.adnd.spotifystreamer.MediaPlayerService.MediaPlayerServiceBinder;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment containing Media Player
  */
 public class TrackPreviewFragment extends Fragment {
 
-    private final static Integer DELAY = 500;
+    private final static Integer REFRESH_RATE = 500;
     private static final String CURRENT_POSITION = "CURRENT_POSITION";
-    private final static String DESTROY_INTENT = "DestructionIntent";
     private final String LOG_TAG = TrackPreviewFragment.class.getSimpleName();
-    private final String IDLE = "IDLE";
-    private final String PREPARING = "PREPARING";
-    private final String READY = "READY";
-    private final String PLAYING = "PLAYING";
-    private final String PAUSED = "PAUSED";
+
+    private final String IDLE = "Idle";
+    private final String PREPARING = "Preparing";
+    private final String READY = "Ready";
+    private final String PLAYING = "Playing";
+    private final String PAUSED = "Paused";
+
     TextView artistNameView;
     TextView albumNameView;
     TextView trackNameView;
@@ -51,7 +51,6 @@ public class TrackPreviewFragment extends Fragment {
     ImageButton mButtonPause;
     MediaPlayerService mService;
     Handler progressHandler = new Handler();
-    MediaPlayerResultReceiver resultReceiver;
 
     private Integer mTrackIndex;
     private String mArtistName;
@@ -59,6 +58,9 @@ public class TrackPreviewFragment extends Fragment {
     private ArrayList<TrackInfo> mTrackInfo = new ArrayList<TrackInfo>();
     private boolean mIsBound;
     private int mCurrentPosition;
+
+    //TODO Get a flag to signify end of a track, them use to toggle play/pause image.
+    //TODO find out how to see a running service in ADB or Device
 
     private Runnable updateProgress = new Runnable() {
         @Override
@@ -71,14 +73,29 @@ public class TrackPreviewFragment extends Fragment {
             trackEndView.setText(formatDuration(duration));
 
             currentPosition = mService.getCurrentPosition();
-            trackSeekBar.setProgress(currentPosition + DELAY);
-            trackStartView.setText(formatDuration(currentPosition + DELAY));
+            trackSeekBar.setProgress(currentPosition/* + REFRESH_RATE*/);
+            trackStartView.setText(formatDuration(currentPosition + REFRESH_RATE));
 
             mCurrentPosition = currentPosition;
 
-            progressHandler.postDelayed(updateProgress, DELAY);
+            Log.d(LOG_TAG,
+                    String.valueOf(mService.isPlaying())
+                            + "; " + String.valueOf(mService.getCurrentPosition() + REFRESH_RATE)
+                            + "; " + String.valueOf(mService.getDuration()));
+
+
+            if (((mService.getCurrentPosition() + REFRESH_RATE) > mService.getDuration()) &&
+                    (mService.getDuration() > 0)) {
+
+                mService.setPlayerState(READY);
+                progressHandler.removeCallbacks(updateProgress);
+                mButtonPause.setImageResource(android.R.drawable.ic_media_play);
+
+            } else
+                progressHandler.postDelayed(updateProgress, REFRESH_RATE);
         }
     };
+
 
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -104,25 +121,13 @@ public class TrackPreviewFragment extends Fragment {
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        resultReceiver = new MediaPlayerResultReceiver(null);
-    }
-
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         Log.d(LOG_TAG, "onCreateView");
 
-        if (savedInstanceState != null) {
-            // Restore last state for checked position.
-            mCurrentPosition = savedInstanceState.getInt(CURRENT_POSITION, 0);
-        }
-
         Intent intent = getActivity().getIntent();
+
         mTrackInfo = intent.getParcelableArrayListExtra(TopTenTracksFragment.SAVED_TRACK_INFO);
         mArtistName = intent.getStringExtra(TopTenTracksFragment.ARTIST_NAME);
         mTrackIndex = intent.getIntExtra(TopTenTracksFragment.TRACK_INDEX, 0);
@@ -135,19 +140,20 @@ public class TrackPreviewFragment extends Fragment {
 
                 setTrackInfo();
 
-                if (PAUSED.equals(mService.getPlayerState())) {
-
-                    setPauseButtonImage();
-                    progressHandler.postDelayed(updateProgress, DELAY);
+                if (mService.getPlayerState().equals(PAUSED)) {
+                    Log.d(LOG_TAG, "Pressed Pause");
+                    mButtonPause.setImageResource(android.R.drawable.ic_media_pause);
+                    progressHandler.postDelayed(updateProgress, REFRESH_RATE);
                     mService.start();
 
-                } else if (PLAYING.equals(mService.getPlayerState())) {
-
-                    setPauseButtonImage();
+                } else if (mService.getPlayerState().equals(PLAYING)) {
+                    Log.d(LOG_TAG, "Pressed Play");
                     mService.pause();
+                    mButtonPause.setImageResource(android.R.drawable.ic_media_play);
                     progressHandler.removeCallbacks(updateProgress);
 
-                } else {
+                } else if (mService.getPlayerState().equals(READY)) {
+                    Log.d(LOG_TAG, "Fresh Play");
                     playPreview(mPreviewUrl);
                 }
             }
@@ -204,6 +210,7 @@ public class TrackPreviewFragment extends Fragment {
                 mService.seekTo(progress);
 
                 if (!PLAYING.equals(mService.getPlayerState())) {
+                    progressHandler.postDelayed(updateProgress, REFRESH_RATE);
                     mService.start();
                 }
 
@@ -222,8 +229,7 @@ public class TrackPreviewFragment extends Fragment {
         super.onStart();
 
         Log.d(LOG_TAG, "onStart - ");
-//        Toast.makeText(getActivity(), "onStart - Binding",
-//                Toast.LENGTH_SHORT).show();
+
         BindToService();
     }
 
@@ -234,21 +240,8 @@ public class TrackPreviewFragment extends Fragment {
         Log.d(LOG_TAG, "onResume - ");
 
         if (mCurrentPosition > 0) {
-
-//            try {
-//                Thread.sleep(1000);
-//
-//            } catch (InterruptedException e) {
-//                return;
-//            } catch (Exception e) {
-//                return;
-//            }
-
-            //mService.seekTo(mCurrentPosition + (7 * DELAY));
-            progressHandler.postDelayed(updateProgress, DELAY);
+            progressHandler.postDelayed(updateProgress, REFRESH_RATE);
         }
-
-
     }
 
     @Override
@@ -291,15 +284,12 @@ public class TrackPreviewFragment extends Fragment {
 
     private void playPreview(String url) {
 
-        progressHandler.removeCallbacks(updateProgress);
-
+        mButtonPause.setImageResource(android.R.drawable.ic_media_pause);
         mService.setTrackUrl(url);
         mService.reset();
         mService.play();
 
-        setPauseButtonImage();
-
-        progressHandler.postDelayed(updateProgress, DELAY);
+        progressHandler.postDelayed(updateProgress, REFRESH_RATE);
     }
 
     private String formatDuration(Integer duration) {
@@ -310,25 +300,11 @@ public class TrackPreviewFragment extends Fragment {
 
     }
 
-    private void setPauseButtonImage() {
-
-        if (!PLAYING.equals(mService.getPlayerState())) {
-            mButtonPause.setImageResource(android.R.drawable.ic_media_pause);
-        } else {
-            mButtonPause.setImageResource(android.R.drawable.ic_media_play);
-        }
-    }
 
     void BindToService() {
 
         Intent intent = new Intent(getActivity()
                 .getApplicationContext(), MediaPlayerService.class);
-
-        intent.putExtra(DESTROY_INTENT, resultReceiver);
-
-        getActivity()
-                .getApplicationContext()
-                .startService(intent);
 
         getActivity()
                 .getApplicationContext()
@@ -347,37 +323,4 @@ public class TrackPreviewFragment extends Fragment {
         }
     }
 
-    class MediaPlayerResultReceiver extends ResultReceiver {
-        public MediaPlayerResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (resultCode == 100) {
-                try {
-
-                    Thread.sleep(2000);
-
-                    //TODO let service kill self.
-                    // remove callbacks ??
-                    // then Set mIsBound to false here
-                    // wrap playTrack in mISBound
-
-                    Log.d(LOG_TAG, "MediaPlayerResultReceiver onReceiveResult- "
-                            + resultData.get(DESTROY_INTENT));
-
-                    progressHandler.removeCallbacks(updateProgress);
-                    UnBindService();
-
-                } catch (InterruptedException e) {
-                    return;
-                } catch (Exception e) {
-                    return;
-                }
-            }
-        }
-    }
-
-    //TODO Re-init media player OnResume. Take care of Fragment LifeCycle issues
 }

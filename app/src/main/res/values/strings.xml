@@ -59,7 +59,6 @@
         <item>us-USA</item>
         <item>uy-Uruguay</item>
     </string-array>
-
     <string name="app_name">Spotify Streamer</string>
     <string name="prompt_artist_name">Enter an Artist</string>
     <string name="action_settings">Settings</string>
@@ -67,5 +66,11 @@
     <string name="title_activity_top_ten_tracks">Top 10 Tracks</string>
     <string name="title_dialog_countries">Select a country</string>
     <string name="title_activity_track_preview">Track Preview</string>
+
+    <string name="title_play">Play Track</string>
+    <string name="title_previous">Previous Track</string>
+    <string name="title_next">Next Track</string>
+    <string name="title_album_art">Album Art</string>
+
 
 </resources>

@@ -5,59 +5,29 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.Date;
 
 public class MediaPlayerService extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
 
-    private final static long IDLE_TIME = 1 * 30 * 1000;
-    private final static int INTERVAL = 1 * 60 * 1000;
-    private final static String DESTROY_INTENT = "DestructionIntent";
-
-
     private final String LOG_TAG = MediaPlayerService.class.getSimpleName();
     private final IBinder mBinder = new MediaPlayerServiceBinder();
-    PlayerState mPlayerState = PlayerState.IDLE;
+
+    private final String IDLE = "Idle";
+    private final String PREPARING = "Preparing";
+    private final String READY = "Ready";
+    private final String PLAYING = "Playing";
+    private final String PAUSED = "Paused";
+
+
+    String mPlayerState = IDLE;
     MediaPlayer mMediaPlayer;
-    ResultReceiver resultReceiver;
-    Handler idleCheckHandler = new Handler();
     private String mPreviewUrl;
     private int mDuration;
-    private long mLastServiceRequestTime;
-    private Runnable idleCheck = new Runnable() {
-        @Override
-        public void run() {
 
-            long idleCheckTime = new Date().getTime();
-
-            Log.d(LOG_TAG, "idling for "
-                    + (idleCheckTime - mLastServiceRequestTime) + " milliseconds");
-
-            if ((idleCheckTime - mLastServiceRequestTime) > IDLE_TIME) {
-
-                Log.d(LOG_TAG, "idleCheck - Send Destruction Intent");
-
-                Bundle bundle = new Bundle();
-                bundle.putString(DESTROY_INTENT, DESTROY_INTENT);
-
-                if (resultReceiver == null)
-                    Log.d(LOG_TAG, "idleCheck - resultReceiver is NULL");
-
-                resultReceiver.send(100, bundle);
-
-                //destroyService();
-            }
-
-            idleCheckHandler.postDelayed(idleCheck, INTERVAL);
-        }
-    };
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -66,10 +36,7 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onCreate() {
-
-        mLastServiceRequestTime = new Date().getTime();
-        Log.d(LOG_TAG, "mLastServiceRequestTime " + mLastServiceRequestTime);
-        idleCheckHandler.postDelayed(idleCheck, 0);
+        Log.d(LOG_TAG, "onCreate - MediaPlayer Service Created");
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -77,30 +44,11 @@ public class MediaPlayerService extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        resultReceiver = intent.getParcelableExtra(DESTROY_INTENT);
-
-        if (resultReceiver == null) Log.d(LOG_TAG, "onStartCommand - resultReceiver is NULL");
-
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-
-        Log.d(LOG_TAG, "onDestroy - Destroying");
-        destroyService();
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
-    }
-
-    public void destroyService() {
-
-        idleCheckHandler.removeCallbacks(idleCheck);
 
         if (null != mMediaPlayer) {
             mMediaPlayer.release();
@@ -109,13 +57,18 @@ public class MediaPlayerService extends Service
             stopSelf();
         }
 
-        Log.d(LOG_TAG, "destroyService - Destroyed");
+        Log.d(LOG_TAG, "onDestroy - MediaPlayer Service Destroyed");
+
+        super.onDestroy();
     }
 
-    public void play() {
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        return false;
+    }
 
-        mLastServiceRequestTime = new Date().getTime();
-        Log.d(LOG_TAG, "mLastServiceRequestTime " + mLastServiceRequestTime);
+
+    public void play() {
 
         try {
 
@@ -123,9 +76,9 @@ public class MediaPlayerService extends Service
 
             mMediaPlayer.prepareAsync();
 
-            mPlayerState = PlayerState.PREPARING;
+            mPlayerState = PREPARING;
 
-            Log.d(LOG_TAG, "prepareTrack -" + mPlayerState.toString());
+            Log.d(LOG_TAG, "prepareTrack -" + mPlayerState);
 
         } catch (IOException e) {
             Log.d(LOG_TAG, "prepareTrack Failure");
@@ -134,49 +87,42 @@ public class MediaPlayerService extends Service
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mPlayerState = PlayerState.READY;
+        mPlayerState = READY;
         mDuration = mp.getDuration();
         start();
     }
 
     public void start() {
 
-        if (mPlayerState.equals(PlayerState.READY)
-                || mPlayerState.equals(PlayerState.PAUSED)) {
+        if (mPlayerState.equals(READY)
+                || mPlayerState.equals(PAUSED)) {
             mMediaPlayer.start();
 
-            mLastServiceRequestTime = new Date().getTime();
-            Log.d(LOG_TAG, "mLastServiceRequestTime " + mLastServiceRequestTime);
-
-            mPlayerState = PlayerState.PLAYING;
+            mPlayerState = PLAYING;
         }
     }
 
     public void reset() {
         mMediaPlayer.reset();
-        mPlayerState = PlayerState.PREPARING;
+        mPlayerState = PREPARING;
     }
 
     public void pause() {
 
-        if (mPlayerState.equals(PlayerState.PLAYING)) {
+        if (mPlayerState.equals(PLAYING)) {
             mMediaPlayer.pause();
-
-            mLastServiceRequestTime = new Date().getTime();
-            Log.d(LOG_TAG, "mLastServiceRequestTime " + mLastServiceRequestTime);
-
-            mPlayerState = PlayerState.PAUSED;
+            mPlayerState = PAUSED;
         }
     }
 
     public void seekTo(Integer progress) {
 
         mMediaPlayer.seekTo(progress);
+        mPlayerState = READY;
+    }
 
-        mLastServiceRequestTime = new Date().getTime();
-        Log.d(LOG_TAG, "mLastServiceRequestTime " + mLastServiceRequestTime);
-
-        mPlayerState = PlayerState.READY;
+    public boolean isPlaying() {
+        return mMediaPlayer.isPlaying();
     }
 
     public void setTrackUrl(String url) {
@@ -184,7 +130,11 @@ public class MediaPlayerService extends Service
     }
 
     public String getPlayerState() {
-        return mPlayerState.toString();
+        return mPlayerState;
+    }
+
+    public void setPlayerState(String state) {
+        mPlayerState = state;
     }
 
     public Integer getDuration() {
@@ -193,14 +143,6 @@ public class MediaPlayerService extends Service
 
     public Integer getCurrentPosition() {
         return mMediaPlayer.getCurrentPosition();
-    }
-
-    private enum PlayerState {
-        IDLE,
-        PREPARING,
-        READY,
-        PLAYING,
-        PAUSED
     }
 
     public class MediaPlayerServiceBinder extends Binder {

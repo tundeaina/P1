@@ -1,0 +1,19 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:divider="?android:attr/dividerHorizontal"
+    android:orientation="horizontal"
+    tools:context="com.aina.adnd.spotifystreamer.ArtistSearchActivity">
+
+    <fragment
+        android:id="@+id/artist_search_fragment"
+        android:name="com.aina.adnd.spotifystreamer.ArtistSearchFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        tools:layout="@layout/fragment_artist_search" />
+
+
+</LinearLayout>
