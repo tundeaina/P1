@@ -1,5 +1,7 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,9 +11,11 @@ import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -27,12 +31,14 @@ import com.aina.adnd.spotifystreamer.MediaPlayerService.MediaPlayerServiceBinder
 /**
  * Fragment containing Media Player
  */
-public class TrackPreviewFragment extends Fragment {
+public class TrackPreviewFragment extends DialogFragment {
 
+    public final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
+    public final static String TRACK_INDEX = "TRACK_INDEX";
+    public final static String ARTIST_NAME = "ARTIST_NAME";
     private final static Integer REFRESH_RATE = 500;
     private static final String CURRENT_POSITION = "CURRENT_POSITION";
     private final String LOG_TAG = TrackPreviewFragment.class.getSimpleName();
-
     private final String IDLE = "Idle";
     private final String PREPARING = "Preparing";
     private final String READY = "Ready";
@@ -60,7 +66,6 @@ public class TrackPreviewFragment extends Fragment {
     private int mCurrentPosition;
 
     //TODO Get a flag to signify end of a track, them use to toggle play/pause image.
-    //TODO find out how to see a running service in ADB or Device
 
     private Runnable updateProgress = new Runnable() {
         @Override
@@ -124,13 +129,17 @@ public class TrackPreviewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        //setRetainInstance(true);
+
         Log.d(LOG_TAG, "onCreateView");
 
-        Intent intent = getActivity().getIntent();
+        Bundle args = getArguments();
 
-        mTrackInfo = intent.getParcelableArrayListExtra(TopTenTracksFragment.SAVED_TRACK_INFO);
-        mArtistName = intent.getStringExtra(TopTenTracksFragment.ARTIST_NAME);
-        mTrackIndex = intent.getIntExtra(TopTenTracksFragment.TRACK_INDEX, 0);
+        if (args != null) {
+            mTrackInfo = args.getParcelableArrayList(SAVED_TRACK_INFO);
+            mArtistName = args.getString(ARTIST_NAME);
+            mTrackIndex = args.getInt(TRACK_INDEX, 0);
+        }
 
         View rootView = inflater.inflate(R.layout.fragment_track_preview, container, false);
 
@@ -221,8 +230,12 @@ public class TrackPreviewFragment extends Fragment {
         trackStartView = (TextView) rootView.findViewById(R.id.textview_track_start);
         trackEndView = (TextView) rootView.findViewById(R.id.textview_track_end);
 
+        if (getActivity().findViewById(R.id.top_ten_tracks_container) != null) {
+        }
+
         return rootView;
     }
+
 
     @Override
     public void onStart() {
@@ -254,6 +267,13 @@ public class TrackPreviewFragment extends Fragment {
 
         //UnBindService();
     }
+
+//    @Override
+//    public void onDestroyView() {
+//        if (getDialog() != null && getRetainInstance())
+//            getDialog().setOnDismissListener(null);
+//        super.onDestroyView();
+//    }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {

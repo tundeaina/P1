@@ -1,5 +1,7 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,6 +15,17 @@ public class TrackPreviewActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_preview);
+
+        if (savedInstanceState == null) {
+
+            FragmentManager fragmentManager = getFragmentManager();
+            TrackPreviewFragment trackPreviewFragment = new TrackPreviewFragment();
+            trackPreviewFragment.setArguments(getIntent().getExtras());
+
+            fragmentManager.beginTransaction()
+                    .add(R.id.track_preview_container, trackPreviewFragment)
+                    .commit();
+        }
     }
 
     @Override

@@ -22,7 +22,7 @@ public class CountryListDialogFragment extends DialogFragment {
     private final static String _DR = "dr";
     private final static String _DO = "do";
 
-    DialogMessenger messenger;
+    CountryListSelectListener mCallback;
     private CountryListAdapter mAdapter;
     private ArrayList<CountryInfo> mCountryInfo = new ArrayList<CountryInfo>();
     private ListView countryList;
@@ -30,7 +30,13 @@ public class CountryListDialogFragment extends DialogFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        messenger = (DialogMessenger) activity;
+
+        try {
+            mCallback = (CountryListSelectListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement CountryListSelectListener");
+        }
     }
 
     @Override
@@ -92,7 +98,7 @@ public class CountryListDialogFragment extends DialogFragment {
 
                 CountryInfo country = mCountryInfo.get(position);
 
-                messenger.onDialogMessage(COUNTRY_DIALOG, country);
+                mCallback.onCountryListSelect(COUNTRY_DIALOG, country);
 
                 dismiss();
 
@@ -100,5 +106,9 @@ public class CountryListDialogFragment extends DialogFragment {
         });
 
         countryList.setAdapter(mAdapter);
+    }
+
+    public interface CountryListSelectListener {
+        void onCountryListSelect(String sender, Object message);
     }
 }

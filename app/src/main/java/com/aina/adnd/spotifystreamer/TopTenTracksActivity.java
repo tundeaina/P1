@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+//TODO MIMIC ASA for 2 pane config
 
 public class TopTenTracksActivity extends ActionBarActivity
-        implements DialogMessenger {
+        implements CountryListDialogFragment.CountryListSelectListener,
+        TopTenTracksFragment.onTrackSelectListener {
 
     public final static String COUNTRY_CODE = "COUNTRY_CODE";
     public final static String COUNTRY = "COUNTRY";
@@ -21,6 +23,17 @@ public class TopTenTracksActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_top_ten_tracks);
+
+        if (savedInstanceState == null) {
+
+            TopTenTracksFragment topTenTracksFragment = new TopTenTracksFragment();
+
+            topTenTracksFragment.setArguments(getIntent().getExtras());
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.top_ten_tracks_container, topTenTracksFragment)
+                    .commit();
+        }
 
     }
 
@@ -63,7 +76,8 @@ public class TopTenTracksActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void onDialogMessage(String sender, Object message) {
+    //CallBack From CountryListDialogFragment
+    public void onCountryListSelect(String sender, Object message) {
 
         CountryInfo countryInfo = (CountryInfo) message;
 
@@ -87,5 +101,13 @@ public class TopTenTracksActivity extends ActionBarActivity
 
         startActivity(intent);
 
+    }
+
+    //CallBack From TopTenTracksFragment
+    public void onTrackSelected(Bundle bundle) {
+
+        Intent intent = new Intent(TopTenTracksActivity.this, TrackPreviewActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 }

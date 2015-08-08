@@ -2,11 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/touch_selector"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:paddingBottom="5dp"
     android:paddingLeft="15dp"
-    android:paddingRight="15dp">
-
+    android:paddingRight="15dp"
+    android:paddingTop="5dp">
 
     <FrameLayout
         android:layout_width="100dp"
@@ -29,13 +31,13 @@
             android:id="@+id/list_item_album_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/list_item_track_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
     </LinearLayout>
 
 </LinearLayout>

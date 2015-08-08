@@ -1,5 +1,6 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -34,14 +35,18 @@ import kaaes.spotify.webapi.android.models.Image;
 
 public class ArtistSearchFragment extends Fragment {
 
-    public final static String ARTIST_ID = "ARTIST_ID";
-    public final static String ARTIST_NAME = "ARTIST_NAME";
-    public final static String COUNTRY_CODE = "COUNTRY_CODE";
-    public final static String COUNTRY = "COUNTRY";
+    private final static String ARTIST_ID = "ARTIST_ID";
+    private final static String ARTIST_NAME = "ARTIST_NAME";
+    private final static String COUNTRY_CODE = "COUNTRY_CODE";
+    private final static String COUNTRY = "COUNTRY";
     private final static String SAVED_ARTIST_INFO = "SAVED_ARTIST_INFO";
+    private final static String CURR_LIST_POSITION = "CURR_LIST_POSITION";
+    ListView artistList;
+    onArtistSelectListener mCallbackArtistSearchActivity;
     private ArtistListAdapter mAdapter;
     private ArrayList<ArtistInfo> mArtistInfo = new ArrayList<ArtistInfo>();
     private String mArtistQueryString;
+    private Integer mCurrPosition = 0;
 
     public ArtistSearchFragment() {
     }
@@ -53,6 +58,7 @@ public class ArtistSearchFragment extends Fragment {
         if (savedInstanceState != null) {
 
             mArtistInfo = savedInstanceState.getParcelableArrayList(SAVED_ARTIST_INFO);
+            mCurrPosition = savedInstanceState.getInt(CURR_LIST_POSITION);
         }
 
         mAdapter = new ArtistListAdapter(getActivity(), mArtistInfo);
@@ -88,7 +94,7 @@ public class ArtistSearchFragment extends Fragment {
             }
         });
 
-        ListView artistList = (ListView) rootView.findViewById(R.id.listview_artist);
+        artistList = (ListView) rootView.findViewById(R.id.listview_artist);
 
         artistList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -96,24 +102,48 @@ public class ArtistSearchFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
 
+                mCurrPosition = position;
 
                 ArtistInfo artist = mArtistInfo.get(position);
 
-                Intent intent = new Intent(getActivity(), TopTenTracksActivity.class);
-                intent.putExtra(ARTIST_ID, artist.getId());
-                intent.putExtra(ARTIST_NAME, artist.getName());
-                intent.putExtra(COUNTRY_CODE, ArtistSearchActivity.getCountryCode());
-                intent.putExtra(COUNTRY, ArtistSearchActivity.getCountry());
+                Bundle args = new Bundle();
+                args.putString(ARTIST_ID, artist.getId());
+                args.putString(ARTIST_NAME, artist.getName());
+                args.putString(COUNTRY_CODE, ArtistSearchActivity.getCountryCode());
+                args.putString(COUNTRY, ArtistSearchActivity.getCountry());
 
-                startActivity(intent);
+                mCallbackArtistSearchActivity.onArtistSelected(args);
 
+                if (getFragmentManager()
+                        .findFragmentById(R.id.top_ten_tracks_container) != null) {
+                    artistList.setItemChecked(position, true);
+                }
 
             }
         });
 
         artistList.setAdapter(mAdapter);
-        
+
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        artistList.setSelection(mCurrPosition);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallbackArtistSearchActivity = (onArtistSelectListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement onArtistSelectListener");
+        }
     }
 
     @Override
@@ -123,7 +153,14 @@ public class ArtistSearchFragment extends Fragment {
 
         savedState.putParcelableArrayList(SAVED_ARTIST_INFO, artistinfo);
 
+        savedState.putInt(CURR_LIST_POSITION, mCurrPosition);
+
         super.onSaveInstanceState(savedState);
+    }
+
+
+    public interface onArtistSelectListener {
+        void onArtistSelected(Bundle bundle);
     }
 
     public class FetchArtistsTask extends AsyncTask<String, Void, ArtistsPager> {
@@ -184,6 +221,4 @@ public class ArtistSearchFragment extends Fragment {
             }
         }
     }
-
-
 }

@@ -1,9 +1,11 @@
 package com.aina.adnd.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,20 +33,19 @@ public class TopTenTracksFragment extends Fragment {
 
     public final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
     public final static String TRACK_INDEX = "TRACK_INDEX";
-    public final static String TRACK_PREVIEW_URL = "TRACK_PREVIEW_URL";
     public final static String ARTIST_NAME = "ARTIST_NAME";
-    public final static String ALBUM_NAME = "ALBUM_NAME";
-    public final static String TRACK_NAME = "TRACK_NAME";
-    public final static String ALBUM_ART = "ALBUM_ART";
+    public final static String ARTIST_ID = "ARTIST_ID";
+    public final static String COUNTRY_CODE = "COUNTRY_CODE";
     private final static String QUERY_PARAMETER = "country";
-
+    private final static String CURR_LIST_POSITION = "CURR_LIST_POSITION";
+    ListView trackList;
+    onTrackSelectListener mCallbackArtistSearchActivity;
     private TrackListAdapter mAdapter;
     private ArrayList<TrackInfo> mTrackInfo = new ArrayList<TrackInfo>();
-
+    private Integer mCurrPosition = 0;
     private String mArtistName;
     private String mArtistId;
     private String mCountryCode;
-    private String mCountry;
 
     public TopTenTracksFragment() {
     }
@@ -53,39 +54,37 @@ public class TopTenTracksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Intent intent = getActivity().getIntent();
-        mArtistName = intent.getStringExtra(ArtistSearchFragment.ARTIST_NAME);
-        mArtistId = intent.getStringExtra(ArtistSearchFragment.ARTIST_ID);
-        mCountryCode = intent.getStringExtra(ArtistSearchFragment.COUNTRY_CODE);
-        mCountry = intent.getStringExtra(ArtistSearchFragment.COUNTRY);
+        Bundle args = getArguments();
 
-        CountryFlag countryFlag = new CountryFlag(((TopTenTracksActivity) getActivity())
-                , mCountryCode);
+        if (args != null) {
+            mArtistName = args.getString(ARTIST_NAME);
+            mArtistId = args.getString(ARTIST_ID);
+            mCountryCode = args.getString(COUNTRY_CODE);
+        }
+
+        ActionBarActivity parentActivity = (ActionBarActivity) getActivity();
+
+        CountryFlag countryFlag = new CountryFlag(parentActivity, mCountryCode);
 
         countryFlag.render();
 
-//        ((TopTenTracksActivity) getActivity()).getSupportActionBar()
-//                .setTitle(getActivity().getTitle() + " - [" + mCountry + "]");
-
-        ((TopTenTracksActivity) getActivity()).getSupportActionBar()
-                .setSubtitle(mArtistName);
+        parentActivity.getSupportActionBar().setSubtitle(mArtistName);
 
         if (savedInstanceState != null) {
 
             mTrackInfo = savedInstanceState.getParcelableArrayList(SAVED_TRACK_INFO);
+            mCurrPosition = savedInstanceState.getInt(CURR_LIST_POSITION);
         } else {
 
             FetchTopTracksTask trackTask = new FetchTopTracksTask();
             trackTask.execute(mArtistId);
         }
 
-
-
         mAdapter = new TrackListAdapter(getActivity(), mTrackInfo);
 
         View rootView = inflater.inflate(R.layout.fragment_top_ten_tracks, container, false);
 
-        ListView trackList = (ListView) rootView.findViewById(R.id.listview_top10tracks);
+        trackList = (ListView) rootView.findViewById(R.id.listview_top10tracks);
 
         trackList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -93,19 +92,21 @@ public class TopTenTracksFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
 
-                TrackInfo track = mTrackInfo.get(position);
+                mCurrPosition = position;
 
-                Intent intent = new Intent(getActivity(), TrackPreviewActivity.class);
+                Bundle args = new Bundle();
 
-                intent.putParcelableArrayListExtra(SAVED_TRACK_INFO, mAdapter.getTrackInfo());
-                intent.putExtra(ARTIST_NAME, mArtistName);
-                intent.putExtra(TRACK_INDEX, position);
+                args.putParcelableArrayList(SAVED_TRACK_INFO, mAdapter.getTrackInfo());
+                args.putString(ARTIST_NAME, mArtistName);
+                args.putInt(TRACK_INDEX, position);
 
-//                intent.putExtra(TRACK_PREVIEW_URL, track.getPreviewUrl());
-//                intent.putExtra(ALBUM_NAME, track.getAlbumName());
-//                intent.putExtra(TRACK_NAME, track.getTrackName());
-//                intent.putExtra(ALBUM_ART, track.getAlbumArtUrl_Large());
-                startActivity(intent);
+                mCallbackArtistSearchActivity.onTrackSelected(args);
+
+                if (getFragmentManager()
+                        .findFragmentById(R.id.top_ten_tracks_container) != null) {
+                    trackList.setItemChecked(position, true);
+                }
+
 
             }
         });
@@ -116,14 +117,35 @@ public class TopTenTracksFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        trackList.setSelection(mCurrPosition);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallbackArtistSearchActivity = (onTrackSelectListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement onTrackSelectListener");
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle savedState) {
 
-        ArrayList<TrackInfo> trackInfo = mAdapter.getTrackInfo();
-
-        savedState.putParcelableArrayList(SAVED_TRACK_INFO, trackInfo);
+        savedState.putParcelableArrayList(SAVED_TRACK_INFO, mTrackInfo);
+        savedState.putInt(CURR_LIST_POSITION, mCurrPosition);
 
         super.onSaveInstanceState(savedState);
+    }
 
+    public interface onTrackSelectListener {
+        void onTrackSelected(Bundle bundle);
     }
 
     public class FetchTopTracksTask extends AsyncTask<String, Void, Tracks> {
@@ -188,6 +210,8 @@ public class TopTenTracksFragment extends Fragment {
 
                     mAdapter.add(trackInfo);
                 }
+
+                mTrackInfo = mAdapter.getTrackInfo();
 
             } else {
                 Toast.makeText(getActivity(), "No tracks found for\n"
