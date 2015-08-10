@@ -96,8 +96,8 @@ public class ArtistSearchActivity extends ActionBarActivity
             FragmentManager fragmentManager = getFragmentManager();
             TrackPreviewFragment trackPreviewFragment = new TrackPreviewFragment();
             trackPreviewFragment.setArguments(bundle);
-
             trackPreviewFragment.show(fragmentManager, "dialog");
+
         } else {
             Intent intent = new Intent(ArtistSearchActivity.this, TrackPreviewActivity.class);
             intent.putExtras(bundle);

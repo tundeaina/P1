@@ -83,10 +83,10 @@ public class TrackPreviewFragment extends DialogFragment {
 
             mCurrentPosition = currentPosition;
 
-            Log.d(LOG_TAG,
-                    String.valueOf(mService.isPlaying())
-                            + "; " + String.valueOf(mService.getCurrentPosition() + REFRESH_RATE)
-                            + "; " + String.valueOf(mService.getDuration()));
+//            Log.d(LOG_TAG,
+//                    String.valueOf(mService.isPlaying())
+//                            + "; " + String.valueOf(mService.getCurrentPosition() + REFRESH_RATE)
+//                            + "; " + String.valueOf(mService.getDuration()));
 
 
             if (((mService.getCurrentPosition() + REFRESH_RATE) > mService.getDuration()) &&
@@ -124,14 +124,21 @@ public class TrackPreviewFragment extends DialogFragment {
     public TrackPreviewFragment() {
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //setRetainInstance(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        //setRetainInstance(true);
-
         Log.d(LOG_TAG, "onCreateView");
+
+        if (savedInstanceState != null) {
+            mCurrentPosition = savedInstanceState.getInt(CURRENT_POSITION);
+        }
 
         Bundle args = getArguments();
 
@@ -230,9 +237,6 @@ public class TrackPreviewFragment extends DialogFragment {
         trackStartView = (TextView) rootView.findViewById(R.id.textview_track_start);
         trackEndView = (TextView) rootView.findViewById(R.id.textview_track_end);
 
-        if (getActivity().findViewById(R.id.top_ten_tracks_container) != null) {
-        }
-
         return rootView;
     }
 
@@ -253,6 +257,7 @@ public class TrackPreviewFragment extends DialogFragment {
         Log.d(LOG_TAG, "onResume - ");
 
         if (mCurrentPosition > 0) {
+            Log.d(LOG_TAG, "onResume mCurrentPosition - " + mCurrentPosition);
             progressHandler.postDelayed(updateProgress, REFRESH_RATE);
         }
     }
@@ -270,8 +275,11 @@ public class TrackPreviewFragment extends DialogFragment {
 
 //    @Override
 //    public void onDestroyView() {
-//        if (getDialog() != null && getRetainInstance())
-//            getDialog().setOnDismissListener(null);
+//
+//        if (getActivity().findViewById(R.id.top_ten_tracks_container) != null) {
+//            if (getDialog() != null && getRetainInstance())
+//                getDialog().setOnDismissListener(null);
+//        }
 //        super.onDestroyView();
 //    }
 

@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-//TODO MIMIC ASA for 2 pane config
-
 public class TopTenTracksActivity extends ActionBarActivity
         implements CountryListDialogFragment.CountryListSelectListener,
         TopTenTracksFragment.onTrackSelectListener {
