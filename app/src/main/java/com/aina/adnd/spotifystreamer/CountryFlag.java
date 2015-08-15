@@ -29,6 +29,15 @@ public class CountryFlag {
 
         ImageView imageView = new ImageView(actionBar.getThemedContext());
 
+//        imageView.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View view) {
+//                Toast.makeText(mActivity, "Refresh Clicked!",
+//                        Toast.LENGTH_LONG).show();
+//            }
+//        });
+
         imageView.setScaleType(ImageView.ScaleType.CENTER);
 
         String countryCode = (_DO.equals(mCountryCode)) ? _DR : mCountryCode;
@@ -43,9 +52,9 @@ public class CountryFlag {
         ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
                 ActionBar.LayoutParams.WRAP_CONTENT,
                 ActionBar.LayoutParams.WRAP_CONTENT,
-                Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+                Gravity.TOP);
 
-        layoutParams.rightMargin = 40;
+        //layoutParams.rightMargin = 20;
         imageView.setLayoutParams(layoutParams);
         actionBar.setCustomView(imageView);
     }

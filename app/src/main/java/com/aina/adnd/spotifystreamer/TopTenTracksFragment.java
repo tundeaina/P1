@@ -1,7 +1,6 @@
 package com.aina.adnd.spotifystreamer;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -31,13 +30,13 @@ import kaaes.spotify.webapi.android.models.Tracks;
 
 public class TopTenTracksFragment extends Fragment {
 
-    public final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
-    public final static String TRACK_INDEX = "TRACK_INDEX";
-    public final static String ARTIST_NAME = "ARTIST_NAME";
-    public final static String ARTIST_ID = "ARTIST_ID";
-    public final static String COUNTRY_CODE = "COUNTRY_CODE";
+    public final static String SAVED_TRACK_INFO = "SavedTrackInfo";
+    public final static String TRACK_INDEX = "TrackIndex";
+    public final static String ARTIST_NAME = "ArtistName";
+    public final static String ARTIST_ID = "ArtistId";
+    public final static String COUNTRY_CODE = "CountryCode";
     private final static String QUERY_PARAMETER = "country";
-    private final static String CURR_LIST_POSITION = "CURR_LIST_POSITION";
+    private final static String CURR_LIST_POSITION = "CurrentListPosition";
     ListView trackList;
     onTrackSelectListener mCallbackArtistSearchActivity;
     private TrackListAdapter mAdapter;
@@ -144,6 +143,14 @@ public class TopTenTracksFragment extends Fragment {
         super.onSaveInstanceState(savedState);
     }
 
+
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//
+//        trackList.setSelection(mCurrPosition);
+//    }
+
     public interface onTrackSelectListener {
         void onTrackSelected(Bundle bundle);
     }
@@ -189,17 +196,14 @@ public class TopTenTracksFragment extends Fragment {
                     for (Image img : track.album.images) {
                         if (img.height <= 300) {
                             imageUrl_Small = img.url;
-
                         }
 
                         if (img.height >= 301) {
                             imageUrl_Large = img.url;
-
                         }
                     }
 
                     imageUrl_Large = (null == imageUrl_Large) ? NO_IMAGE_URL : imageUrl_Large;
-
                     imageUrl_Small = (null == imageUrl_Small) ? NO_IMAGE_URL : imageUrl_Small;
 
                     trackInfo.setPreviewUrl(track.preview_url);

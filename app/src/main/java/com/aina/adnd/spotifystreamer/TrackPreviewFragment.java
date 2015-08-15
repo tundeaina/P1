@@ -1,6 +1,5 @@
 package com.aina.adnd.spotifystreamer;
 
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,14 +7,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -23,6 +19,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -33,18 +30,15 @@ import com.aina.adnd.spotifystreamer.MediaPlayerService.MediaPlayerServiceBinder
  */
 public class TrackPreviewFragment extends DialogFragment {
 
-    public final static String SAVED_TRACK_INFO = "SAVED_TRACK_INFO";
-    public final static String TRACK_INDEX = "TRACK_INDEX";
-    public final static String ARTIST_NAME = "ARTIST_NAME";
+    public final static String SAVED_TRACK_INFO = "SavedTrackInfo";
+    public final static String TRACK_INDEX = "TrackIndex";
+    public final static String ARTIST_NAME = "ArtistName";
+    private static final String CURRENT_POSITION = "CurrentPosition";
     private final static Integer REFRESH_RATE = 500;
-    private static final String CURRENT_POSITION = "CURRENT_POSITION";
     private final String LOG_TAG = TrackPreviewFragment.class.getSimpleName();
-    private final String IDLE = "Idle";
-    private final String PREPARING = "Preparing";
     private final String READY = "Ready";
     private final String PLAYING = "Playing";
     private final String PAUSED = "Paused";
-
     TextView artistNameView;
     TextView albumNameView;
     TextView trackNameView;
@@ -65,8 +59,6 @@ public class TrackPreviewFragment extends DialogFragment {
     private boolean mIsBound;
     private int mCurrentPosition;
 
-    //TODO Get a flag to signify end of a track, them use to toggle play/pause image.
-
     private Runnable updateProgress = new Runnable() {
         @Override
         public void run() {
@@ -82,12 +74,6 @@ public class TrackPreviewFragment extends DialogFragment {
             trackStartView.setText(formatDuration(currentPosition + REFRESH_RATE));
 
             mCurrentPosition = currentPosition;
-
-//            Log.d(LOG_TAG,
-//                    String.valueOf(mService.isPlaying())
-//                            + "; " + String.valueOf(mService.getCurrentPosition() + REFRESH_RATE)
-//                            + "; " + String.valueOf(mService.getDuration()));
-
 
             if (((mService.getCurrentPosition() + REFRESH_RATE) > mService.getDuration()) &&
                     (mService.getDuration() > 0)) {
@@ -127,7 +113,7 @@ public class TrackPreviewFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
+//        setRetainInstance(true);
     }
 
     @Override
@@ -218,7 +204,6 @@ public class TrackPreviewFragment extends DialogFragment {
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -229,9 +214,6 @@ public class TrackPreviewFragment extends DialogFragment {
                     progressHandler.postDelayed(updateProgress, REFRESH_RATE);
                     mService.start();
                 }
-
-//                Toast.makeText(getActivity(), "seek bar progress:" + progress,
-//                        Toast.LENGTH_SHORT).show();
             }
         });
         trackStartView = (TextView) rootView.findViewById(R.id.textview_track_start);
@@ -240,6 +222,11 @@ public class TrackPreviewFragment extends DialogFragment {
         return rootView;
     }
 
+//    @Override
+//    public void onActivityCreated (Bundle savedInstanceState){
+//        super.onActivityCreated(savedInstanceState);
+//
+//    }
 
     @Override
     public void onStart() {
@@ -289,7 +276,6 @@ public class TrackPreviewFragment extends DialogFragment {
         savedInstanceState.putInt(CURRENT_POSITION, mCurrentPosition);
     }
 
-
     private void setTrackInfo() {
 
         mPreviewUrl = mTrackInfo.get(mTrackIndex).getPreviewUrl();
@@ -328,7 +314,6 @@ public class TrackPreviewFragment extends DialogFragment {
 
     }
 
-
     void BindToService() {
 
         Intent intent = new Intent(getActivity()
@@ -339,9 +324,6 @@ public class TrackPreviewFragment extends DialogFragment {
                 .bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         mIsBound = true;
-
-        //Toast.makeText(getActivity(), "BindToService - Bound", Toast.LENGTH_SHORT).show();
-
     }
 
     void UnBindService() {

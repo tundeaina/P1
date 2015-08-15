@@ -8,7 +8,7 @@ import android.preference.PreferenceManager;
  * Created by Tunde Aina on 7/6/2015.
  */
 public class UserPreferences {
-    static final String PREF_USER_COUNTRY_CODE = "countrycode";
+    static final String PREF_USER_COUNTRY_CODE = "CountryCode";
 
     static SharedPreferences getSharedPreferences(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);

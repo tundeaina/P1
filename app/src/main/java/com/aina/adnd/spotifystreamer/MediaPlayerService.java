@@ -22,7 +22,6 @@ public class MediaPlayerService extends Service
     private final String PLAYING = "Playing";
     private final String PAUSED = "Paused";
 
-
     String mPlayerState = IDLE;
     MediaPlayer mMediaPlayer;
     private String mPreviewUrl;

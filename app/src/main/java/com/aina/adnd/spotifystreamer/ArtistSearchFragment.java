@@ -2,14 +2,12 @@ package com.aina.adnd.spotifystreamer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -35,12 +33,12 @@ import kaaes.spotify.webapi.android.models.Image;
 
 public class ArtistSearchFragment extends Fragment {
 
-    private final static String ARTIST_ID = "ARTIST_ID";
-    private final static String ARTIST_NAME = "ARTIST_NAME";
-    private final static String COUNTRY_CODE = "COUNTRY_CODE";
-    private final static String COUNTRY = "COUNTRY";
-    private final static String SAVED_ARTIST_INFO = "SAVED_ARTIST_INFO";
-    private final static String CURR_LIST_POSITION = "CURR_LIST_POSITION";
+    private final static String ARTIST_ID = "ArtistId";
+    private final static String ARTIST_NAME = "ArtistName";
+    private final static String COUNTRY_CODE = "CountryCode";
+    private final static String COUNTRY = "Country";
+    private final static String SAVED_ARTIST_INFO = "SavedTrackInfo";
+    private final static String CURR_LIST_POSITION = "CurrentListPosition";
     ListView artistList;
     onArtistSelectListener mCallbackArtistSearchActivity;
     private ArtistListAdapter mAdapter;
@@ -158,6 +156,12 @@ public class ArtistSearchFragment extends Fragment {
         super.onSaveInstanceState(savedState);
     }
 
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//
+//        artistList.setSelection(mCurrPosition);
+//    }
 
     public interface onArtistSelectListener {
         void onArtistSelected(Bundle bundle);
@@ -174,12 +178,12 @@ public class ArtistSearchFragment extends Fragment {
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
 
-            try{
+            try {
 
                 return spotify.searchArtists(params[0]);
 
             } catch (Exception e) {
-                Log.e(LOG_TAG, "Error ", e);
+                Log.e(LOG_TAG, "Error -> " + e.getMessage(), e);
                 return null;
             }
 
@@ -190,22 +194,23 @@ public class ArtistSearchFragment extends Fragment {
 
             mAdapter.clear();
 
-            if (results.artists.items.size() > 0) {
+            if (results != null &&
+                    results.artists.items.size() > 0) {
 
-                for(Artist artist:  results.artists.items) {
+                for (Artist artist : results.artists.items) {
 
                     ArtistInfo artistInfo = new ArtistInfo();
 
                     String imageUrl = null;
 
-                    for(Image img: artist.images){
+                    for (Image img : artist.images) {
                         if (img.width <= 600) {
                             imageUrl = img.url;
                             break;
                         }
                     }
 
-                    if(null == imageUrl)
+                    if (null == imageUrl)
                         imageUrl = NO_IMAGE_URL;
 
                     artistInfo.setId(artist.id);

@@ -10,8 +10,8 @@ public class TopTenTracksActivity extends ActionBarActivity
         implements CountryListDialogFragment.CountryListSelectListener,
         TopTenTracksFragment.onTrackSelectListener {
 
-    public final static String COUNTRY_CODE = "COUNTRY_CODE";
-    public final static String COUNTRY = "COUNTRY";
+    public final static String COUNTRY_CODE = "CountryCode";
+    public final static String COUNTRY = "Country";
     private static final String COUNTRY_DIALOG = "CountryDialog";
     private static String mCountryCode;
     private static String mCountry;
@@ -84,10 +84,6 @@ public class TopTenTracksActivity extends ActionBarActivity
         mCountry = countryInfo.getCountryName();
 
         UserPreferences.setUserCountryCode(this, mCountryCode);
-
-//        CountryFlag countryFlag = new CountryFlag(this,mCountryCode);
-//
-//        countryFlag.render();
 
         finish();
 

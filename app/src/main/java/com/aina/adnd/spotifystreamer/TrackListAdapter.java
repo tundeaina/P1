@@ -32,43 +32,53 @@ public class TrackListAdapter extends ArrayAdapter<TrackInfo> {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View rowView = inflater.inflate(R.layout.list_item_track, null, true);
-
-        TextView album_name_view = (TextView) rowView.findViewById(R.id.list_item_album_name);
-
-        TextView track_name_view = (TextView) rowView.findViewById(R.id.list_item_track_name);
-
-        ImageView album_art_view = (ImageView) rowView.findViewById(R.id.list_item_album_art_small);
-
         TrackInfo track;
-
         track = Tracks.get(position);
+
+        final ViewHolder viewHolder;
+
+        if (view == null) {
+            viewHolder = new ViewHolder();
+            view = inflater.inflate(R.layout.list_item_track, parent, false);
+            viewHolder.mAlbumName = (TextView) view.findViewById(R.id.list_item_album_name);
+            viewHolder.mTrackName = (TextView) view.findViewById(R.id.list_item_track_name);
+            viewHolder.mAlbumArt = (ImageView) view.findViewById(R.id.list_item_album_art_small);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+            viewHolder.mAlbumArt.setImageBitmap(null);
+        }
 
         if (null != track) {
 
-            album_name_view.setText(track.getAlbumName());
-
-            track_name_view.setText(track.getTrackName());
+            viewHolder.mAlbumName.setText(track.getAlbumName());
+            viewHolder.mTrackName.setText(track.getTrackName());
 
             String albumArtUrl = track.getAlbumArtUrl_Small();
 
             if (albumArtUrl.equals(TopTenTracksFragment.FetchTopTracksTask.NO_IMAGE_URL))
                 Picasso.with(context)
                         .load(R.drawable.no_image)
-                        .into(album_art_view);
+                        .into(viewHolder.mAlbumArt);
             else
                 Picasso.with(context)
                         .load(albumArtUrl)
                         .placeholder(R.drawable.no_image)
                         .resize(256, 256)
                         .centerCrop()
-                        .into(album_art_view);
+                        .into(viewHolder.mAlbumArt);
         }
 
-        return rowView;
+        return view;
     }
 
     public ArrayList<TrackInfo> getTrackInfo() {
         return this.Tracks;
+    }
+
+    class ViewHolder {
+        TextView mAlbumName;
+        TextView mTrackName;
+        ImageView mAlbumArt;
     }
 }

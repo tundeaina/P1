@@ -3,19 +3,26 @@ package com.aina.adnd.spotifystreamer;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 
 public class ArtistSearchActivity extends ActionBarActivity
         implements CountryListDialogFragment.CountryListSelectListener,
         ArtistSearchFragment.onArtistSelectListener,
         TopTenTracksFragment.onTrackSelectListener {
 
-    private final static String COUNTRY_CODE = "COUNTRY_CODE";
-    private final static String COUNTRY = "COUNTRY";
-    private static final String TOPTENTRACKSFRAGMENT_TAG = "TTTTAG";
+    public final static String SAVED_TRACK_INFO = "SavedTrackInfo";
+    public final static String TRACK_INDEX = "TrackIndex";
+    public final static String ARTIST_NAME = "ArtistName";
+    private final static String COUNTRY_CODE = "CountryCode";
+    private final static String COUNTRY = "Country";
+    private static final String TOPTENTRACKSFRAGMENT_TAG = "TopTenTrackFragment";
     private static final String COUNTRY_DIALOG = "CountryDialog";
     private static final String TRACKPREVIEWFRAGMENT_TAG = "TrackPreviewFragment";
     private static final String DEFAULT_COUNTRY_CODE = "us";
@@ -25,6 +32,9 @@ public class ArtistSearchActivity extends ActionBarActivity
     private boolean mSw600dp;
     private Bundle mArtistBundle;
     private Bundle mTrackBundle;
+
+    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareItem;
 
     public static String getCountryCode() {
 
@@ -65,7 +75,14 @@ public class ArtistSearchActivity extends ActionBarActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        mShareItem = menu.findItem(R.id.menu_item_share);
+
+        if (!mSw600dp)
+            mShareItem.setVisible(false);
+
         return true;
     }
 
@@ -88,19 +105,26 @@ public class ArtistSearchActivity extends ActionBarActivity
 
     //CallBack From TopTenTracksFragment
     public void onTrackSelected(Bundle bundle) {
-
         mTrackBundle = bundle;
 
-        if (mSw600dp) {
+        Intent shareIntent = createShareIntent(mTrackBundle);
 
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat
+                .getActionProvider(mShareItem);
+
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
+
+        if (mSw600dp) {
             FragmentManager fragmentManager = getFragmentManager();
             TrackPreviewFragment trackPreviewFragment = new TrackPreviewFragment();
-            trackPreviewFragment.setArguments(bundle);
-            trackPreviewFragment.show(fragmentManager, "dialog");
+            trackPreviewFragment.setArguments(mTrackBundle);
+            trackPreviewFragment.show(fragmentManager, TRACKPREVIEWFRAGMENT_TAG);
 
         } else {
             Intent intent = new Intent(ArtistSearchActivity.this, TrackPreviewActivity.class);
-            intent.putExtras(bundle);
+            intent.putExtras(mTrackBundle);
             startActivity(intent);
         }
     }
@@ -113,11 +137,8 @@ public class ArtistSearchActivity extends ActionBarActivity
         if (mSw600dp) {
 
             TopTenTracksFragment topTenTracksFragment = new TopTenTracksFragment();
-
             topTenTracksFragment.setArguments(bundle);
-
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
             transaction.replace(R.id.top_ten_tracks_container, topTenTracksFragment);
             transaction.addToBackStack(TOPTENTRACKSFRAGMENT_TAG);
             transaction.commit();
@@ -128,7 +149,6 @@ public class ArtistSearchActivity extends ActionBarActivity
             startActivity(intent);
         }
     }
-
 
     //CallBack From CountryListDialogFragment
     public void onCountryListSelect(String sender, Object message) {
@@ -161,5 +181,27 @@ public class ArtistSearchActivity extends ActionBarActivity
 
         }
 
+    }
+
+    private Intent createShareIntent(Bundle bundle) {
+
+        Intent intent = new Intent();
+        String artistName = bundle.getString(ARTIST_NAME);
+        Integer trackIndex = bundle.getInt(TRACK_INDEX, 0);
+        ArrayList<TrackInfo> trackInfo = bundle.getParcelableArrayList(SAVED_TRACK_INFO);
+
+        if (trackInfo != null) {
+            String trackUrl = trackInfo.get(trackIndex).getPreviewUrl();
+            String trackName = trackInfo.get(trackIndex).getTrackName();
+
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, "Currently listening to \""
+                    + trackName + "\" by " + artistName + " on Spotify. Check it out at\n"
+                    + trackUrl);
+
+            intent.setType("text/plain");
+        }
+
+        return intent;
     }
 }

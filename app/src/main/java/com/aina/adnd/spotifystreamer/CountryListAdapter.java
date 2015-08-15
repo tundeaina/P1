@@ -26,11 +26,6 @@ public class CountryListAdapter extends ArrayAdapter<CountryInfo> {
         this.mCountries = countries;
     }
 
-//    class ViewHolder {
-//        ImageView mFlagImage;
-//        TextView mCountryName;
-//    }
-
     @Override
     public View getView(int position, View view, ViewGroup parent) {
 
@@ -40,50 +35,37 @@ public class CountryListAdapter extends ArrayAdapter<CountryInfo> {
         CountryInfo country;
         country = mCountries.get(position);
 
-//        final ViewHolder viewHolder;
-//
-//        if (view == null) {
-//            viewHolder = new ViewHolder();
-//            view = inflater.inflate(R.layout.list_item_country, null, true);;
-//            viewHolder.mFlagImage = (ImageView) view.findViewById(R.id.list_item_flag);
-//            viewHolder.mCountryName = (TextView) view.findViewById(R.id.list_item_country);
-//            view.setTag(viewHolder);
-//        } else {
-//            viewHolder = (ViewHolder) view.getTag();
-//            viewHolder.mFlagImage.setImageBitmap(null);
-//        }
-//
-//        if (null != country) {
-//
-//            viewHolder.mCountryName.setText(country.getCountryName());
-//
-//            Picasso.with(context)
-//                    .load(country.getCountryFlagId())
-//                    .into(viewHolder.mFlagImage);
-//        }
-//
-//        return view;
+        final ViewHolder viewHolder;
 
-        View rowView = inflater.inflate(R.layout.list_item_country, null, true);
-
-        TextView country_name_view = (TextView) rowView.findViewById(R.id.list_item_country);
-
-        ImageView country_flag_view = (ImageView) rowView.findViewById(R.id.list_item_flag);
+        if (view == null) {
+            viewHolder = new ViewHolder();
+            view = inflater.inflate(R.layout.list_item_country, parent, false);
+            viewHolder.mFlagImage = (ImageView) view.findViewById(R.id.list_item_flag);
+            viewHolder.mCountryName = (TextView) view.findViewById(R.id.list_item_country);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+            viewHolder.mFlagImage.setImageBitmap(null);
+        }
 
         if (null != country) {
 
-            country_name_view.setText(country.getCountryName());
+            viewHolder.mCountryName.setText(country.getCountryName());
 
             Picasso.with(context)
                     .load(country.getCountryFlagId())
-                    .placeholder(R.drawable.no_image)
-                    .into(country_flag_view);
+                    .into(viewHolder.mFlagImage);
         }
 
-        return rowView;
+        return view;
     }
 
     public ArrayList<CountryInfo> getCountryInfo() {
         return this.mCountries;
+    }
+
+    class ViewHolder {
+        ImageView mFlagImage;
+        TextView mCountryName;
     }
 }

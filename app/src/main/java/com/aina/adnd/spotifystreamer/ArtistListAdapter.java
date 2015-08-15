@@ -32,39 +32,49 @@ public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View rowView = inflater.inflate(R.layout.list_item_artist, null, true);
-
-        TextView artist_name_view = (TextView) rowView.findViewById(R.id.list_item_name);
-
-        ImageView artist_thumbnail_view = (ImageView) rowView.findViewById(R.id.list_item_thumbnail);
-
         ArtistInfo artist;
-
         artist = Artists.get(position);
+
+        final ViewHolder viewHolder;
+
+        if (view == null) {
+            viewHolder = new ViewHolder();
+            view = inflater.inflate(R.layout.list_item_artist, parent, false);
+            viewHolder.mArtistName = (TextView) view.findViewById(R.id.list_item_name);
+            viewHolder.mAlbumThumbnail = (ImageView) view.findViewById(R.id.list_item_thumbnail);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+            viewHolder.mAlbumThumbnail.setImageBitmap(null);
+        }
 
         if (null != artist) {
 
-            artist_name_view.setText(artist.getName());
-
+            viewHolder.mArtistName.setText(artist.getName());
             String imageURL = artist.getThumbnailUrl();
 
             if (imageURL.equals(ArtistSearchFragment.FetchArtistsTask.NO_IMAGE_URL))
                 Picasso.with(context)
                         .load(R.drawable.no_image)
-                        .into(artist_thumbnail_view);
+                        .into(viewHolder.mAlbumThumbnail);
             else
                 Picasso.with(context)
                         .load(imageURL)
                         .placeholder(R.drawable.no_image)
                         .resize(256, 256)
                         .centerCrop()
-                        .into(artist_thumbnail_view);
+                        .into(viewHolder.mAlbumThumbnail);
         }
 
-        return rowView;
+        return view;
     }
 
     public ArrayList<ArtistInfo> getArtistInfo() {
         return this.Artists;
+    }
+
+    class ViewHolder {
+        TextView mArtistName;
+        ImageView mAlbumThumbnail;
     }
 }
