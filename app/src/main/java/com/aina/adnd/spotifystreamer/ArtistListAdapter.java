@@ -51,6 +51,7 @@ public class ArtistListAdapter extends ArrayAdapter<ArtistInfo> {
         if (null != artist) {
 
             viewHolder.mArtistName.setText(artist.getName());
+
             String imageURL = artist.getThumbnailUrl();
 
             if (imageURL.equals(ArtistSearchFragment.FetchArtistsTask.NO_IMAGE_URL))

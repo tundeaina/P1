@@ -1,6 +1,9 @@
 package com.aina.adnd.spotifystreamer;
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -75,8 +78,14 @@ public class TopTenTracksFragment extends Fragment {
             mCurrPosition = savedInstanceState.getInt(CURR_LIST_POSITION);
         } else {
 
-            FetchTopTracksTask trackTask = new FetchTopTracksTask();
-            trackTask.execute(mArtistId);
+            if (isNetworkAvailable()) {
+                FetchTopTracksTask trackTask = new FetchTopTracksTask();
+                trackTask.execute(mArtistId);
+            } else {
+                Toast.makeText(getActivity()
+                        , getResources().getString(R.string.prompt_connectivity)
+                        , Toast.LENGTH_LONG).show();
+            }
         }
 
         mAdapter = new TrackListAdapter(getActivity(), mTrackInfo);
@@ -105,7 +114,6 @@ public class TopTenTracksFragment extends Fragment {
                         .findFragmentById(R.id.top_ten_tracks_container) != null) {
                     trackList.setItemChecked(position, true);
                 }
-
 
             }
         });
@@ -151,6 +159,14 @@ public class TopTenTracksFragment extends Fragment {
 //        trackList.setSelection(mCurrPosition);
 //    }
 
+    //Based on a stackoverflow snippet
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     public interface onTrackSelectListener {
         void onTrackSelected(Bundle bundle);
     }
@@ -184,7 +200,8 @@ public class TopTenTracksFragment extends Fragment {
 
             mAdapter.clear();
 
-            if (results.tracks.size() > 0) {
+            if (results != null &&
+                    results.tracks.size() > 0) {
 
                 for (Track track : results.tracks) {
 

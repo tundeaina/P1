@@ -1,6 +1,7 @@
 package com.aina.adnd.spotifystreamer;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,8 +53,11 @@ public class CountryListAdapter extends ArrayAdapter<CountryInfo> {
 
             viewHolder.mCountryName.setText(country.getCountryName());
 
+            // Country Flag Image 'url' is safe because the images are stored in \res\Drawable
+            Integer imageResID = country.getCountryFlagId();
+
             Picasso.with(context)
-                    .load(country.getCountryFlagId())
+                    .load(imageResID)
                     .into(viewHolder.mFlagImage);
         }
 

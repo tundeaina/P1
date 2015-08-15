@@ -2,6 +2,8 @@ package com.aina.adnd.spotifystreamer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -77,8 +79,16 @@ public class ArtistSearchFragment extends Fragment {
                     mArtistQueryString = artistQueryText.getText().toString();
 
                     if (mArtistQueryString.length() > 0) {
-                        FetchArtistsTask artistTask = new FetchArtistsTask();
-                        artistTask.execute(mArtistQueryString);
+
+                        if (isNetworkAvailable()) {
+
+                            FetchArtistsTask artistTask = new FetchArtistsTask();
+                            artistTask.execute(mArtistQueryString);
+                        } else {
+                            Toast.makeText(getActivity()
+                                    , getResources().getString(R.string.prompt_connectivity)
+                                    , Toast.LENGTH_LONG).show();
+                        }
                     }
 
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
@@ -163,6 +173,14 @@ public class ArtistSearchFragment extends Fragment {
 //        artistList.setSelection(mCurrPosition);
 //    }
 
+    //Based on a stackoverflow snippet
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     public interface onArtistSelectListener {
         void onArtistSelected(Bundle bundle);
     }
@@ -179,7 +197,6 @@ public class ArtistSearchFragment extends Fragment {
             SpotifyService spotify = api.getService();
 
             try {
-
                 return spotify.searchArtists(params[0]);
 
             } catch (Exception e) {
