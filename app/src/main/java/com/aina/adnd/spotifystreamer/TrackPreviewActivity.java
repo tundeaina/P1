@@ -35,6 +35,7 @@ public class TrackPreviewActivity extends ActionBarActivity {
             fragmentManager.beginTransaction()
                     .add(R.id.track_preview_container, trackPreviewFragment)
                     .commit();
+
         }
     }
 
