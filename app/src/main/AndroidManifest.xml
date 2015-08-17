@@ -12,9 +12,9 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!-- android:configChanges="orientation|screenSize"-->
         <activity
             android:name=".ArtistSearchActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
